@@ -12,19 +12,24 @@
         </div>
 
         <!-- Form untuk memilih bulan dengan desain yang lebih rapi -->
-        <form action="{{ route('maintenances.index') }}" method="GET" class="mb-3 d-flex" style="max-width: 500px;">
-            <div class="input-group" style="max-width: 300px;">
+        <form action="{{ route('maintenances.index') }}" method="GET" class="mb-3 d-flex flex-wrap gap-2" style="max-width: 650px;">
+            <div class="input-group me-2" style="max-width: 150px;">
                 <select name="bulan" id="bulan" class="form-control">
                     <option value="">Pilih Bulan</option>
                     @foreach (range(1, 12) as $bulan)
                         <option value="{{ $bulan }}" {{ request()->get('bulan') == $bulan ? 'selected' : '' }}>
-                            {{ \Carbon\Carbon::create()->month($bulan)->format('F') }}
+                            {{ \Carbon\Carbon::create()->month($bulan)->translatedFormat('F') }}
                         </option>
                     @endforeach
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary ml-3">Cari</button>
+            <div class="input-group me-2" style="max-width: 150px;">
+                <input type="number" name="tanggal" class="form-control" min="1" max="31" placeholder="Tanggal"
+                       value="{{ request()->get('tanggal') }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Cari</button>
         </form>
+        
 
         <!-- Tombol untuk hapus semua data bulan yang dipilih -->
         @if(request()->get('bulan'))

@@ -10,16 +10,25 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class MaintenanceController extends Controller
 {
     public function index(Request $request) {
-        // If there's a month selected, filter the data by the selected month
-        if ($request->has('bulan')) {
-            $bulan = $request->get('bulan');
-            $maintenances = Maintenance::whereMonth('tanggal_setting', $bulan)->get();
-        } else {
-            $maintenances = Maintenance::all();
+        $query = Maintenance::query();
+    
+        // Ambil inputan bulan dan tanggal (optional)
+        $bulan = $request->get('bulan');
+        $tanggal = $request->get('tanggal');
+    
+        if ($bulan) {
+            $query->whereMonth('tanggal_setting', $bulan);
         }
-        
+    
+        if ($tanggal) {
+            $query->whereDay('tanggal_setting', $tanggal);
+        }
+    
+        $maintenances = $query->get();
+    
         return view('maintenances.index', compact('maintenances'));
     }
+    
 
     public function create() {
         // Display the form to add a new maintenance project
