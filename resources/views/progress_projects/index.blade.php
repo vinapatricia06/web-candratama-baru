@@ -67,7 +67,6 @@
             </div>
         </form>
 
-
         <!-- Menampilkan pesan sukses -->
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
@@ -82,7 +81,7 @@
 
         <!-- Tabel untuk menampilkan progress project dengan responsif -->
         <div class="table-responsive" style="max-width: 100%; overflow-x: auto;">
-            <table class="table table-bordered table-striped" style="font-size: 18px; width: 100%; table-layout: auto;">
+            <table class="table table-bordered" style="font-size: 18px; width: 100%; table-layout: auto;">
                 <thead class="table-light">
                     <tr>
                         <th>No</th>
@@ -120,8 +119,7 @@
                             <td>{{ $project->serah_terima }}</td>
                             <td>
                                 <a href="{{ route('progress_projects.edit', $project->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                                <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST"
-                                    style="display:inline;">
+                                <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm"
@@ -139,8 +137,7 @@
         </div>
 
         <!-- Modal untuk menampilkan gambar besar -->
-        <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel"
-            aria-hidden="true">
+        <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">

@@ -26,7 +26,7 @@
                 @endif
 
                 <div class="card-body">
-                    <table id="klienTable" class="table table-bordered table-striped">
+                       <table class="table table-bordered" style="font-size: 18px; width: 100%; table-layout: auto;">
                         <thead>
                             <tr>
                                 <th>No</th>

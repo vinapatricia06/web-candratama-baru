@@ -12,24 +12,37 @@
 
         <!-- Form untuk pencarian dengan bulan dan tahun -->
         <form action="{{ route('omsets.index') }}" method="GET" class="mb-3">
-            <div class="input-group" style="max-width: 400px;">
-                <input type="text" name="search" class="form-control" placeholder="Klien..."
-                    value="{{ request()->get('search') }}">
-                <input type="text" name="no_induk" class="form-control" placeholder="No Induk"
-                    value="{{ request()->get('no_induk') }}">
-                <select name="bulan" class="form-control">
-                    <option value="">Bulan</option>
-                    @foreach (range(1, 12) as $bulan)
-                        <option value="{{ $bulan }}" {{ request()->get('bulan') == $bulan ? 'selected' : '' }}>
-                            {{ \Carbon\Carbon::create()->month($bulan)->format('F') }}
-                        </option>
-                    @endforeach
-                </select>
-
-                <!-- Mengubah input tipe number menjadi input tipe text untuk mengetikkan tahun tanpa batasan -->
-                <input type="text" name="tahun" class="form-control" placeholder="Tahun"
-                    value="{{ request()->get('tahun') }}" id="tahun">
-                <button type="submit" class="btn btn-primary">Cari</button>
+            <div class="d-flex gap-2" style="max-width: 650px;">
+                <div class="input-group" style="max-width: 150px;">
+                    <input type="text" name="search" class="form-control" placeholder="Klien..."
+                        value="{{ request()->get('search') }}">
+                </div>
+                <div class="input-group" style="max-width: 150px;">
+                    <input type="text" name="no_induk" class="form-control" placeholder="No Induk"
+                        value="{{ request()->get('no_induk') }}">
+                </div>
+                <div class="input-group" style="max-width: 150px;">
+                    <select name="bulan" class="form-control">
+                        <option value="">Bulan</option>
+                        @foreach (range(1, 12) as $bulan)
+                            <option value="{{ $bulan }}" {{ request()->get('bulan') == $bulan ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create()->month($bulan)->format('F') }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="input-group" style="max-width: 150px;">
+                    <input type="text" name="tahun" class="form-control" placeholder="Tahun"
+                        value="{{ request()->get('tahun') }}" id="tahun">
+                </div>
+                <!-- "Cari" Button with Icon -->
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> 
+                </button>
+                <!-- "Reset" Button with Icon -->
+                <a href="{{ route('omsets.index') }}" class="btn btn-secondary">
+                    <i class="fas fa-sync"></i> 
+                </a>
             </div>
         </form>
 
@@ -80,4 +93,19 @@
             </table>
         </div>
     </div>
+@endsection
+
+@section('script')
+<script>
+    // Trigger the reset button if there's a reset
+    $(document).ready(function() {
+        // If there's any 'Reset' action, it will reset the form
+        $('a[href="{{ route('omsets.index') }}"]').click(function() {
+            $('input[name="search"]').val('');
+            $('input[name="no_induk"]').val('');
+            $('select[name="bulan"]').val('');
+            $('input[name="tahun"]').val('');
+        });
+    });
+</script>
 @endsection

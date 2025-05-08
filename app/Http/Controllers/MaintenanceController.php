@@ -44,7 +44,6 @@ class MaintenanceController extends Controller
             'alamat' => 'required|string',
             'project' => 'required|string|max:255',
             'tanggal_setting' => 'required|date',
-            'tanggal_serah_terima' => 'nullable|date', // Make it nullable
             'maintenance' => 'required|string',
             'status' => 'required|in:Waiting List,Selesai',
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -80,7 +79,6 @@ class MaintenanceController extends Controller
             'alamat' => 'required|string',
             'project' => 'required|string|max:255',
             'tanggal_setting' => 'required|date',
-            'tanggal_serah_terima' => 'nullable|date',
             'maintenance' => 'required|string',
             'status' => 'required|in:Waiting List,Selesai',
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
