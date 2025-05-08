@@ -95,7 +95,7 @@
                 <tr>
                     <td>{{ $key + 1 }}</td>
                     <td>{{ $project->teknisi->nama ?? 'Tidak Ada' }}</td>
-                    <td>{{ $project->klien }}</td>
+                    <td>{{ $project->nama_klien }}</td>
                     <td>{{ $project->alamat }}</td>
                     <td>{{ $project->project }}</td>
                     <td>{{ $project->tanggal_setting }}</td>

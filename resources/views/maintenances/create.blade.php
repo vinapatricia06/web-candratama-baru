@@ -6,30 +6,37 @@
     <div class="container">
         <h2>Tambah Maintenance Project</h2>
 
-        <!-- Menampilkan pop-up jika ada error untuk no_induk -->
         @if ($errors->has('no_induk'))
             <script>
                 alert('No Induk sudah terdaftar, harap gunakan yang berbeda.');
             </script>
         @endif
 
-          <!-- Menampilkan pop-up jika ada error untuk no_induk -->
-          @if ($errors->has('dokumentasi'))
-          <script>
-              alert('Ukuran gambar yang diunggah melebihi batas maksimum 3MB. Silakan pilih gambar dengan ukuran yang lebih kecil.');
-          </script>
-      @endif
+        @if ($errors->has('dokumentasi'))
+            <script>
+                alert('Ukuran gambar yang diunggah melebihi batas maksimum 3MB. Silakan pilih gambar dengan ukuran yang lebih kecil.');
+            </script>
+        @endif
 
         <form action="{{ route('maintenances.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="mb-3">
                 <label>Nama Klien</label>
-                <input type="text" name="nama_klien" class="form-control" required>
+                <select name="nama_klien" id="nama_klien" class="form-control" required>
+                    <option value="">-- Pilih Klien --</option>
+                    @foreach($kliens as $klien)
+                        <option value="{{ $klien->nama_klien }}"
+                            data-no_induk="{{ $klien->no_induk }}"
+                            data-alamat="{{ $klien->alamat }}">
+                            {{ $klien->nama_klien }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
-            
+
             <div class="mb-3">
                 <label>No Induk</label>
-                <input type="text" name="no_induk" class="form-control" required>
+                <input type="text" name="no_induk" id="no_induk" class="form-control" required readonly>
                 @error('no_induk')
                     <div class="text-danger">{{ $message }}</div>
                 @enderror
@@ -37,7 +44,7 @@
 
             <div class="mb-3">
                 <label>Alamat</label>
-                <textarea name="alamat" class="form-control" required></textarea>
+                <textarea name="alamat" id="alamat" class="form-control" required readonly></textarea>
             </div>
 
             <div class="mb-3">
@@ -49,7 +56,6 @@
                 <label>Tanggal Setting</label>
                 <input type="date" name="tanggal_setting" class="form-control" required>
             </div>
-
 
             <div class="mb-3">
                 <label>Maintenance</label>
@@ -73,4 +79,16 @@
             <button type="submit" class="btn btn-success">Simpan</button>
         </form>
     </div>
+
+    <script>
+        // Isi otomatis No Induk dan Alamat berdasarkan pilihan Nama Klien
+        document.getElementById('nama_klien').addEventListener('change', function () {
+            const selected = this.options[this.selectedIndex];
+            const noInduk = selected.getAttribute('data-no_induk');
+            const alamat = selected.getAttribute('data-alamat');
+
+            document.getElementById('no_induk').value = noInduk || '';
+            document.getElementById('alamat').value = alamat || '';
+        });
+    </script>
 @endsection

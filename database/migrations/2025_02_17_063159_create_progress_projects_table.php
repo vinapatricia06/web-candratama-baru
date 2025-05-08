@@ -10,7 +10,7 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('teknisi_id'); 
             $table->foreign('teknisi_id')->references('id_user')->on('users1')->onDelete('cascade'); 
-            $table->string('klien');
+            $table->string('nama_klien');
             $table->text('alamat');
             $table->string('project');
             $table->date('tanggal_setting');

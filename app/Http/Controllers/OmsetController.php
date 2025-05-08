@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use App\Exports\OmsetExport;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Klien;
 
 class OmsetController extends Controller
 {
@@ -45,7 +46,8 @@ class OmsetController extends Controller
 
     public function create()
     {
-        return view('omsets.create');
+        $kliens = Klien::all();
+        return view('omsets.create', compact('kliens'));
     }
 
     public function store(Request $request)

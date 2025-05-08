@@ -13,6 +13,7 @@ use App\Http\Controllers\SuratPurchasingController;
 use App\Http\Controllers\SuratEkspedisiController;
 use App\Http\Controllers\SuratCleaningController;
 use App\Http\Controllers\SuratInteriorConsultanController;
+use App\Http\Controllers\KlienController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -295,3 +296,11 @@ Route::delete('/surat/ekspedisi/destroy-all', [SuratEkspedisiController::class, 
 
 Route::delete('/surat/cleaning/destroy-all', [SuratCleaningController::class, 'destroyAll'])->name('surat.cleaning.destroyAll');
 
+
+Route::get('/kliens', [KlienController::class, 'index'])->name('klien.index');
+Route::get('/kliens/create', [KlienController::class, 'create'])->name('klien.create');
+Route::post('/kliens', [KlienController::class, 'store'])->name('klien.store');
+Route::get('/kliens/{id}/edit', [KlienController::class, 'edit'])->name('klien.edit');
+Route::put('/kliens/{id}', [KlienController::class, 'update'])->name('klien.update');
+Route::delete('/kliens/{id}', [KlienController::class, 'destroy'])->name('klien.destroy');
+Route::post('klien/import', [KlienController::class, 'import'])->name('klien.import');

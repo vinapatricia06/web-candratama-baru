@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Maintenance;
 use Illuminate\Support\Facades\File;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Klien;
 
 class MaintenanceController extends Controller
 {
@@ -31,8 +32,8 @@ class MaintenanceController extends Controller
     
 
     public function create() {
-        // Display the form to add a new maintenance project
-        return view('maintenances.create');
+        $kliens = Klien::all();
+        return view('maintenances.create', compact('kliens'));
     }
 
     public function store(Request $request) {

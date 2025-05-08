@@ -284,6 +284,13 @@
                     <p>Omset</p>
                 </a>
             </li>
+             <li class="nav-item">
+                <a href="{{ route('klien.index') }}"
+                    class="nav-link text-white {{ Request::routeIs('klien.index') ? 'active' : '' }}">
+                    <i class="nav-icon fas fa-user"></i>
+                    <p>Klien</p>
+                </a>
+            </li>
 
             <li class="nav-item">
                 <a href="{{ route('progress_projects.index') }}"

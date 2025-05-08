@@ -7,32 +7,101 @@ use App\Models\ProgressProject;
 use App\Models\User1;
 use Illuminate\Support\Facades\File;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Klien;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ProgressProjectController extends Controller
 {
     public function index(Request $request) {
-        // Jika ada bulan yang dipilih, filter data berdasarkan bulan tersebut
-        if ($request->has('bulan')) {
-            $bulan = $request->get('bulan');
-            // Menyaring project berdasarkan bulan
-            $projects = ProgressProject::whereMonth('tanggal_setting', $bulan)->with('teknisi')->get();
-        } else {
-            // Ambil semua project jika bulan tidak dipilih
-            $projects = ProgressProject::with('teknisi')->get();
+        try {
+            // Log semua parameter yang diterima
+            Log::info('Filter parameters:', $request->all());
+            
+            // Dapatkan semua teknisi untuk dropdown
+            $teknisiList = User1::where('role', 'teknisi')->get();
+            
+            // Cek struktur database
+            if(app()->environment('local')) {
+                $columns = DB::getSchemaBuilder()->getColumnListing('progress_projects');
+                Log::info('Table columns:', $columns);
+                
+                // Debug: ambil satu record untuk melihat struktur data
+                $sampleProject = ProgressProject::first();
+                if ($sampleProject) {
+                    Log::info('Sample project data:', $sampleProject->toArray());
+                }
+            }
+            
+            // Build query
+            $query = ProgressProject::query();
+            
+            // Pastikan eager loading untuk teknisi
+            $query->with('teknisi');
+            
+            // Apply filters
+            if ($request->filled('bulan')) {
+                $query->whereMonth('tanggal_setting', $request->bulan);
+                Log::info('Applying month filter: ' . $request->bulan);
+            }
+            
+            if ($request->filled('tanggal')) {
+                $query->whereDate('tanggal_setting', $request->tanggal);
+                Log::info('Applying date filter: ' . $request->tanggal);
+            }
+            
+            if ($request->filled('teknisi_id')) {
+                $query->where('teknisi_id', $request->teknisi_id);
+                Log::info('Applying teknisi filter: ' . $request->teknisi_id);
+                
+                // DEBUG: log format dari teknisi_id di database
+                if(app()->environment('local')) {
+                    $dbExample = DB::table('progress_projects')
+                        ->select('teknisi_id')
+                        ->first();
+                    
+                    if ($dbExample) {
+                        Log::info('DB teknisi_id format:', [
+                            'type' => gettype($dbExample->teknisi_id),
+                            'value' => $dbExample->teknisi_id
+                        ]);
+                        
+                        Log::info('Request teknisi_id format:', [
+                            'type' => gettype($request->teknisi_id),
+                            'value' => $request->teknisi_id
+                        ]);
+                    }
+                }
+            }
+            
+            // Debug: log the generated SQL query
+            Log::info('Generated SQL: ' . $query->toSql());
+            Log::info('SQL Bindings: ', $query->getBindings());
+            
+            // Execute query
+            $projects = $query->get();
+            
+            // Log hasil
+            Log::info('Found ' . $projects->count() . ' projects');
+            
+            return view('progress_projects.index', compact('projects', 'teknisiList'));
+            
+        } catch (\Exception $e) {
+            Log::error('Error in index method: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        return view('progress_projects.index', compact('projects'));
     }
 
     public function create() {
         $teknisiList = User1::where('role', 'teknisi')->get();
-        return view('progress_projects.create', compact('teknisiList'));
+        $kliens = Klien::all();
+        return view('progress_projects.create', compact('teknisiList', 'kliens'));
     }
 
     public function store(Request $request) {
         $request->validate([
             'teknisi_id' => 'required|exists:users1,id_user',
-            'klien' => 'required|string|max:255',
+            'nama_klien' => 'required|string|max:255',
             'alamat' => 'required|string',
             'project' => 'required|string|max:255',
             'tanggal_setting' => 'required|date',
@@ -65,7 +134,7 @@ class ProgressProjectController extends Controller
     public function update(Request $request, $id) {
         $request->validate([
             'teknisi_id' => 'required|exists:users1,id_user',
-            'klien' => 'required|string|max:255',
+            'nama_klien' => 'required|string|max:255',
             'alamat' => 'required|string',
             'project' => 'required|string|max:255',
             'tanggal_setting' => 'required|date',
@@ -106,38 +175,98 @@ class ProgressProjectController extends Controller
                          ->with('success', 'Project berhasil dihapus.');
     }
 
-    public function downloadPdf()
+    public function downloadPdf(Request $request)
     {
-        $projects = ProgressProject::with('teknisi')->get();
-    
-        foreach ($projects as $project) {
-            if ($project->dokumentasi && file_exists(public_path($project->dokumentasi))) {
-                $path = public_path($project->dokumentasi);
-                $type = pathinfo($path, PATHINFO_EXTENSION);
-                $data = file_get_contents($path);
-                $project->dokumentasi_base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-            } else {
-                $project->dokumentasi_base64 = null;
+        try {
+            Log::info('PDF Download parameters:', $request->all());
+            
+            // Build query
+            $query = ProgressProject::query()->with('teknisi');
+            
+            // Apply filters (sama seperti di method index)
+            if ($request->filled('bulan')) {
+                $query->whereMonth('tanggal_setting', $request->bulan);
             }
+            
+            if ($request->filled('tanggal')) {
+                $query->whereDate('tanggal_setting', $request->tanggal);
+            }
+            
+            if ($request->filled('teknisi_id')) {
+                $query->where('teknisi_id', $request->teknisi_id);
+            }
+            
+            $projects = $query->get();
+            Log::info('PDF will contain ' . $projects->count() . ' projects');
+            
+            // Persiapkan data untuk PDF
+            $filterInfo = [];
+            
+            if ($request->filled('bulan')) {
+                $bulanNama = \Carbon\Carbon::create()->month($request->bulan)->format('F');
+                $filterInfo[] = "Bulan: {$bulanNama}";
+            }
+            
+            if ($request->filled('tanggal')) {
+                $filterInfo[] = "Tanggal: " . $request->tanggal;
+            }
+            
+            if ($request->filled('teknisi_id')) {
+                $teknisi = User1::find($request->teknisi_id);
+                if ($teknisi) {
+                    $filterInfo[] = "Teknisi: " . $teknisi->nama;
+                }
+            }
+            
+            // Process images
+            foreach ($projects as $project) {
+                if ($project->dokumentasi && file_exists(public_path($project->dokumentasi))) {
+                    $path = public_path($project->dokumentasi);
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                    $data = file_get_contents($path);
+                    $project->dokumentasi_base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+                } else {
+                    $project->dokumentasi_base64 = null;
+                }
+            }
+            
+            // Nama file PDF
+            $filename = 'progress_projects';
+            if ($request->filled('teknisi_id')) {
+                $teknisi = User1::find($request->teknisi_id);
+                if ($teknisi) {
+                    $filename .= '_' . str_replace(' ', '_', strtolower($teknisi->nama));
+                }
+            }
+            $filename .= '.pdf';
+            
+            // Generate PDF
+            $pdf = PDF::loadView('progress_projects.pdf', compact('projects', 'filterInfo'))
+                      ->setPaper('A4', 'landscape');
+            
+            return $pdf->download($filename);
+            
+        } catch (\Exception $e) {
+            Log::error('Error in downloadPdf method: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat membuat PDF: ' . $e->getMessage());
         }
-    
-        // Load view PDF
-        $pdf = PDF::loadView('progress_projects.pdf', compact('projects'))
-                  ->setPaper('A4', 'landscape');
-    
-        return $pdf->download('progress_projects.pdf');
     }
     
-
     public function hapusBulan(Request $request)
     {
-        // Ambil bulan dari request
-        $bulan = $request->input('bulan');
-
-        // Hapus semua project di bulan yang dipilih
-        ProgressProject::whereMonth('tanggal_setting', $bulan)->delete();
-
-        return redirect()->route('progress_projects.index')
-                         ->with('success', 'Semua data bulan ini telah dihapus.');
+        try {
+            $bulan = $request->input('bulan');
+            Log::info('Deleting all projects for month: ' . $bulan);
+            
+            $deleted = ProgressProject::whereMonth('tanggal_setting', $bulan)->delete();
+            Log::info('Deleted ' . $deleted . ' projects');
+            
+            return redirect()->route('progress_projects.index')
+                             ->with('success', 'Semua data bulan ini telah dihapus.');
+                             
+        } catch (\Exception $e) {
+            Log::error('Error in hapusBulan method: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        }
     }
 }

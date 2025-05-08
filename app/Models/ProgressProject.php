@@ -9,7 +9,7 @@ class ProgressProject extends Model {
     use HasFactory;
 
     protected $fillable = [
-        'teknisi_id', 'klien', 'alamat', 'project', 
+        'teknisi_id', 'nama_klien', 'alamat', 'project', 
         'tanggal_setting', 'dokumentasi', 'status', 'serah_terima' // Tambahkan serah_terima di sini
     ];
 

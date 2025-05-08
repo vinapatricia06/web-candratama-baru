@@ -29,7 +29,7 @@
             </div>            
             <div class="mb-3">
                 <label>Klien</label>
-                <input type="text" name="klien" class="form-control" value="{{ $progress_project->klien }}" required>
+                <input type="text" name="nama_klien" class="form-control" value="{{ $progress_project->nama_klien }}" required>
             </div>
             <div class="mb-3">
                 <label>Alamat</label>
