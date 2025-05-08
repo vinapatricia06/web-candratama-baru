@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Maintenance;
 use Illuminate\Support\Facades\File;
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Klien;
 
 class MaintenanceController extends Controller
@@ -29,7 +28,6 @@ class MaintenanceController extends Controller
     
         return view('maintenances.index', compact('maintenances'));
     }
-    
 
     public function create() {
         $kliens = Klien::all();
@@ -46,7 +44,7 @@ class MaintenanceController extends Controller
             'tanggal_setting' => 'required|date',
             'maintenance' => 'required|string',
             'status' => 'required|in:Waiting List,Selesai',
-            'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
         ]);
 
         // Store the data
@@ -55,10 +53,9 @@ class MaintenanceController extends Controller
         if ($request->hasFile('dokumentasi')) {
             $file = $request->file('dokumentasi');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('image'), $filename); // Sama seperti yang berhasil
+            $file->move(public_path('image'), $filename); // Save the file in the "image" folder
             $data['dokumentasi'] = 'image/' . $filename;
         }
-        
 
         Maintenance::create($data);
 
@@ -81,7 +78,7 @@ class MaintenanceController extends Controller
             'tanggal_setting' => 'required|date',
             'maintenance' => 'required|string',
             'status' => 'required|in:Waiting List,Selesai',
-            'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
         ]);
 
         // Find the maintenance project to update
@@ -122,28 +119,26 @@ class MaintenanceController extends Controller
     }
 
     public function downloadPdf()
-{
-    $maintenances = Maintenance::all();
+    {
+        $maintenances = Maintenance::all();
 
-    foreach ($maintenances as $maintenance) {
-        if ($maintenance->dokumentasi && file_exists(public_path($maintenance->dokumentasi))) {
-            $path = public_path( $maintenance->dokumentasi);
-            $type = pathinfo($path, PATHINFO_EXTENSION);
-            $data = file_get_contents($path);
-            $maintenance->dokumentasi_base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-        } else {
-            $maintenance->dokumentasi_base64 = null;
+        foreach ($maintenances as $maintenance) {
+            if ($maintenance->dokumentasi && file_exists(public_path($maintenance->dokumentasi))) {
+                $path = public_path($maintenance->dokumentasi);
+                $type = pathinfo($path, PATHINFO_EXTENSION);
+                $data = file_get_contents($path);
+                $maintenance->dokumentasi_base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            } else {
+                $maintenance->dokumentasi_base64 = null;
+            }
         }
+
+        // Load view
+        $pdf = PDF::loadView('maintenances.pdf', compact('maintenances'))
+                  ->setPaper('A4', 'landscape');
+
+        return $pdf->download('maintenances.pdf');
     }
-
-    // Load view
-    $pdf = PDF::loadView('maintenances.pdf', compact('maintenances'))
-              ->setPaper('A4', 'landscape');
-
-    return $pdf->download('maintenances.pdf');
-}
-
-    
 
     public function hapusBulan(Request $request)
     {

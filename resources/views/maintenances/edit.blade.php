@@ -16,7 +16,7 @@
         <!-- Menampilkan pop-up jika ada error untuk no_induk -->
         @if ($errors->has('dokumentasi'))
             <script>
-                alert('Ukuran gambar yang diunggah melebihi batas maksimum 3MB. Silakan pilih gambar dengan ukuran yang lebih kecil.');
+                  alert('Ukuran gambar yang diunggah melebihi batas maksimum 1.5MB. Silakan kompres gambar terlebih dahulu.');
             </script>
         @endif
 

@@ -53,25 +53,6 @@ class ProgressProjectController extends Controller
             if ($request->filled('teknisi_id')) {
                 $query->where('teknisi_id', $request->teknisi_id);
                 Log::info('Applying teknisi filter: ' . $request->teknisi_id);
-                
-                // DEBUG: log format dari teknisi_id di database
-                if(app()->environment('local')) {
-                    $dbExample = DB::table('progress_projects')
-                        ->select('teknisi_id')
-                        ->first();
-                    
-                    if ($dbExample) {
-                        Log::info('DB teknisi_id format:', [
-                            'type' => gettype($dbExample->teknisi_id),
-                            'value' => $dbExample->teknisi_id
-                        ]);
-                        
-                        Log::info('Request teknisi_id format:', [
-                            'type' => gettype($request->teknisi_id),
-                            'value' => $request->teknisi_id
-                        ]);
-                    }
-                }
             }
             
             // Debug: log the generated SQL query
@@ -99,13 +80,14 @@ class ProgressProjectController extends Controller
     }
 
     public function store(Request $request) {
+        // Validate input
         $request->validate([
             'teknisi_id' => 'required|exists:users1,id_user',
             'nama_klien' => 'required|string|max:255',
             'alamat' => 'required|string',
             'project' => 'required|string|max:255',
             'tanggal_setting' => 'required|date',
-            'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
             'status' => 'required|string|max:255',
             'serah_terima' => 'required|in:selesai,belum', 
         ]);
@@ -132,13 +114,14 @@ class ProgressProjectController extends Controller
     }
 
     public function update(Request $request, $id) {
+        // Validate input
         $request->validate([
             'teknisi_id' => 'required|exists:users1,id_user',
             'nama_klien' => 'required|string|max:255',
             'alamat' => 'required|string',
             'project' => 'required|string|max:255',
             'tanggal_setting' => 'required|date',
-            'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
             'status' => 'required|string|max:255',
             'serah_terima' => 'required|in:selesai,belum',
         ]);
@@ -147,6 +130,7 @@ class ProgressProjectController extends Controller
         $data = $request->except(['dokumentasi']);
 
         if ($request->hasFile('dokumentasi')) {
+            // Delete old file if exists
             if ($progress_project->dokumentasi && File::exists(public_path($progress_project->dokumentasi))) {
                 File::delete(public_path($progress_project->dokumentasi));
             }
