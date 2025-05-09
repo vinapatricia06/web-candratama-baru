@@ -16,7 +16,6 @@ class Maintenance extends Model
         'alamat',
         'project',
         'tanggal_setting',
-        'tanggal_serah_terima',
         'maintenance',
         'status',
         'dokumentasi'

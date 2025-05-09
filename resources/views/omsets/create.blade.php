@@ -6,9 +6,9 @@
 <div class="container">
     <h2>Tambah Omset</h2>
 
-    @if ($errors->has('no_induk'))
+    @if ($errors->has('klien_id'))
         <script>
-            alert('No Induk sudah terdaftar, harap gunakan yang berbeda.');
+            alert('Klien yang dipilih tidak valid.');
         </script>
     @endif
 
@@ -20,25 +20,25 @@
         </div>
 
         <div class="form-group">
-            <label for="no_induk">No Induk</label>
-            <select name="no_induk" id="no_induk" class="form-control" required>
-                <option value="">-- Pilih No Induk --</option>
+            <label for="klien_id">Nama Klien</label>
+            <select name="klien_id" id="klien_id" class="form-control" required>
+                <option value="">-- Pilih Nama Klien --</option>
                 @foreach($kliens as $klien)
-                    <option value="{{ $klien->no_induk }}"
-                        data-nama="{{ $klien->nama_klien }}"
+                    <option value="{{ $klien->id }}"
+                        data-no_induk="{{ $klien->no_induk }}"
                         data-alamat="{{ $klien->alamat }}">
-                        {{ $klien->no_induk }}
+                        {{ $klien->nama_klien }}
                     </option>
                 @endforeach
             </select>
-            @error('no_induk')
+            @error('klien_id')
                 <div class="text-danger">{{ $message }}</div>
             @enderror
         </div>
 
         <div class="mb-3">
-            <label>Nama Klien</label>
-            <input type="text" name="nama_klien" id="nama_klien" class="form-control" readonly required>
+            <label>No Induk</label>
+            <input type="text" name="no_induk" id="no_induk" class="form-control" readonly required>
         </div>
 
         <div class="mb-3">
@@ -68,9 +68,9 @@
 
 {{-- Script untuk autofill --}}
 <script>
-    document.getElementById('no_induk').addEventListener('change', function () {
+    document.getElementById('klien_id').addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
-        document.getElementById('nama_klien').value = selectedOption.getAttribute('data-nama') || '';
+        document.getElementById('no_induk').value = selectedOption.getAttribute('data-no_induk') || '';
         document.getElementById('alamat').value = selectedOption.getAttribute('data-alamat') || '';
     });
 </script>

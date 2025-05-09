@@ -6,6 +6,12 @@
 <div class="container">
     <h2>Edit Klien</h2>
 
+    @if ($errors->has('no_induk'))
+    <script>
+        alert('No Induk sudah terdaftar, harap gunakan yang berbeda.');
+    </script>
+@endif
+
     <form action="{{ route('klien.update', $klien->id) }}" method="POST">
         @csrf
         @method('PUT')

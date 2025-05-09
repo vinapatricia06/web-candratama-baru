@@ -5,11 +5,11 @@
 @section('content')
     <div class="container">
         <h2>Edit Omset</h2>
-        
+
         <!-- Menampilkan pesan error jika ada -->
-        @if ($errors->has('no_induk'))
+        @if ($errors->has('klien_id'))
             <script>
-                alert('No Induk sudah terdaftar, harap gunakan yang berbeda.');
+                alert('Klien yang dipilih tidak valid.');
             </script>
         @endif
 
@@ -23,42 +23,59 @@
             </div>
 
             <div class="form-group">
-                <label for="no_induk">No Induk</label>
-                <input type="number" class="form-control" name="no_induk" id="no_induk" 
-                    value="{{ old('no_induk', $omset->no_induk ?? '') }}" required>
-                @error('no_induk')
+                <label for="klien_id">Nama Klien</label>
+                <select name="klien_id" id="klien_id" class="form-control" required>
+                    <option value="">-- Pilih Nama Klien --</option>
+                    @foreach($kliens as $klien)
+                        <option value="{{ $klien->id }}"
+                            data-no_induk="{{ $klien->no_induk }}"
+                            data-alamat="{{ $klien->alamat }}"
+                            {{ $omset->klien_id == $klien->id ? 'selected' : '' }}>
+                            {{ $klien->nama_klien }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('klien_id')
                     <div class="text-danger">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="mb-3">
-                <label>Nama Klien</label>
-                <input type="text" name="nama_klien" class="form-control" value="{{ $omset->nama_klien }}" required>
+                <label>No Induk</label>
+                <input type="text" name="no_induk" id="no_induk" class="form-control" value="{{ old('no_induk', $omset->no_induk) }}" readonly required>
             </div>
 
             <div class="mb-3">
                 <label>Alamat</label>
-                <textarea name="alamat" class="form-control" required>{{ $omset->alamat }}</textarea>
+                <textarea name="alamat" id="alamat" class="form-control" rows="3" readonly required>{{ old('alamat', $omset->alamat) }}</textarea>
             </div>
 
             <div class="mb-3">
                 <label>Project</label>
-                <input type="text" name="project" class="form-control" value="{{ $omset->project }}" required>
+                <input type="text" name="project" class="form-control" value="{{ old('project', $omset->project) }}" required>
             </div>
 
             <div class="form-group">
                 <label for="sumber_lead">Sumber Lead</label>
-                <input type="text" name="sumber_lead" id="sumber_lead" class="form-control"
-                    value="{{ old('sumber_lead', $omset->sumber_lead) }}">
+                <input type="text" name="sumber_lead" id="sumber_lead" class="form-control" value="{{ old('sumber_lead', $omset->sumber_lead) }}">
             </div>
 
             <div class="mb-3">
                 <label>Nominal</label>
-                <input type="number" name="nominal" class="form-control" value="{{ $omset->nominal }}" required>
+                <input type="number" name="nominal" class="form-control" value="{{ old('nominal', $omset->nominal) }}" required>
             </div>
 
             <a href="{{ route('omsets.index') }}" class="btn btn-danger mr-2">Kembali</a>
             <button type="submit" class="btn btn-success">Update</button>
         </form>
     </div>
+
+    {{-- Script untuk autofill --}}
+    <script>
+        document.getElementById('klien_id').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            document.getElementById('no_induk').value = selectedOption.getAttribute('data-no_induk') || '';
+            document.getElementById('alamat').value = selectedOption.getAttribute('data-alamat') || '';
+        });
+    </script>
 @endsection
