@@ -1,40 +1,43 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Maintenance;
-use Illuminate\Support\Facades\File;
 use App\Models\Klien;
+use Illuminate\Support\Facades\File;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MaintenanceController extends Controller
 {
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $query = Maintenance::query();
-    
-        // Ambil inputan bulan dan tanggal (optional)
+
+        // Filter based on month and date (optional)
         $bulan = $request->get('bulan');
         $tanggal = $request->get('tanggal');
-    
+
         if ($bulan) {
             $query->whereMonth('tanggal_setting', $bulan);
         }
-    
+
         if ($tanggal) {
             $query->whereDay('tanggal_setting', $tanggal);
         }
-    
+
         $maintenances = $query->get();
-    
+
         return view('maintenances.index', compact('maintenances'));
     }
 
-    public function create() {
-        $kliens = Klien::all();
+    public function create()
+    {
+        $kliens = Klien::all();  // Fetch all clients
         return view('maintenances.create', compact('kliens'));
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         // Validate input
         $request->validate([
             'nama_klien' => 'required|string|max:255',
@@ -63,13 +66,17 @@ class MaintenanceController extends Controller
                          ->with('success', 'Data Maintenance berhasil ditambahkan.');
     }
 
-    public function edit($id) {
-        // Display the form to edit a maintenance project
+    public function edit($id)
+    {
+        // Find the maintenance project to edit
         $maintenance = Maintenance::findOrFail($id);
-        return view('maintenances.edit', compact('maintenance'));
+        $kliens = Klien::all();  // Get all clients for the dropdown
+
+        return view('maintenances.edit', compact('maintenance', 'kliens'));
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         // Validate input
         $request->validate([
             'nama_klien' => 'required|string|max:255',
@@ -105,7 +112,8 @@ class MaintenanceController extends Controller
                          ->with('success', 'Data Maintenance berhasil diperbarui.');
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
         // Delete maintenance project
         $maintenance = Maintenance::findOrFail($id);
         if ($maintenance->dokumentasi && File::exists(public_path($maintenance->dokumentasi))) {

@@ -66,7 +66,13 @@ class KlienController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv|max:2048',
         ]);
 
+        // Proses impor
         Excel::import(new KlienImport, $request->file('file'));
+
+        // Periksa apakah ada pesan peringatan duplikat
+        if (session('duplicate_warning')) {
+            return redirect()->route('klien.index')->with('duplicate_warning', session('duplicate_warning'));
+        }
 
         return redirect()->route('klien.index')->with('success', 'Klien berhasil diimpor!');
     }

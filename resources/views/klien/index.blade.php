@@ -69,13 +69,15 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  $(function() {
-      $("#klienTable").DataTable({
-          "responsive": true,
-          "lengthChange": true,
-          "autoWidth": false,
-      }).buttons().container().appendTo('#klienTable_wrapper .col-md-6:eq(0)');
-  });
+    @if(session('duplicate_warning'))
+        Swal.fire({
+            title: 'Peringatan!',
+            text: "{{ session('duplicate_warning') }}",
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        });
+    @endif
 </script>
 @endsection

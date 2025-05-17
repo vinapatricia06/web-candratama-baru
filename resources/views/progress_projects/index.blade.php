@@ -31,14 +31,13 @@
                                 @endforeach
                             </select>
                         </div>
-                        
+
                         <!-- Filter Tanggal -->
                         <div class="col-md-4 mb-3">
                             <label for="tanggal">Tanggal Setting:</label>
-                            <input type="date" name="tanggal" id="tanggal" class="form-control" 
-                                value="{{ request('tanggal') }}">
+                            <input type="date" name="tanggal" id="tanggal" class="form-control" value="{{ request('tanggal') }}">
                         </div>
-                        
+
                         <!-- Filter Teknisi -->
                         <div class="col-md-4 mb-3">
                             <label for="teknisi_id">Teknisi:</label>
@@ -52,7 +51,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-12">
                             <button type="submit" class="btn btn-primary">
@@ -70,6 +69,15 @@
         <!-- Menampilkan pesan sukses -->
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+
+        <!-- Tombol untuk hapus semua data bulan yang dipilih -->
+        @if(request()->get('bulan'))
+            <form action="{{ route('progress_projects.hapusBulan') }}" method="POST" class="mb-3">
+                @csrf
+                <input type="hidden" name="bulan" value="{{ request()->get('bulan') }}">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus semua data bulan ini? Semua data akan hilang.')">Hapus Semua Data Bulan Ini</button>
+            </form>
         @endif
 
         <!-- Menempatkan tombol "Download PDF" di sebelah kanan kolom "Aksi" -->
@@ -118,8 +126,10 @@
                             <td>{{ $project->status }}</td>
                             <td>{{ $project->serah_terima }}</td>
                             <td>
-                                <a href="{{ route('progress_projects.edit', $project->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                                <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST" style="display:inline;">
+                                <a href="{{ route('progress_projects.edit', $project->id) }}"
+                                    class="btn btn-warning btn-sm">Edit</a>
+                                <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST"
+                                    style="display:inline;">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger btn-sm"
@@ -137,7 +147,8 @@
         </div>
 
         <!-- Modal untuk menampilkan gambar besar -->
-        <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -163,28 +174,28 @@
         function showImage(src) {
             document.getElementById('modalImage').src = src;
         }
-        
+
         // Script untuk download PDF berdasarkan filter yang dipilih
         document.getElementById('downloadPdfBtn').addEventListener('click', function() {
             // Dapatkan nilai filter dari form
             const bulan = document.getElementById('bulan').value;
             const tanggal = document.getElementById('tanggal').value;
             const teknisiId = document.getElementById('teknisi_id').value;
-            
+
             // Buat URL download dengan parameter filter
             let downloadUrl = "{{ route('progress_projects.downloadPdf') }}";
             let params = [];
-            
+
             if (bulan) params.push(`bulan=${bulan}`);
             if (tanggal) params.push(`tanggal=${tanggal}`);
             if (teknisiId) params.push(`teknisi_id=${teknisiId}`);
-            
+
             if (params.length > 0) {
                 downloadUrl += `?${params.join('&')}`;
             }
-            
+
             console.log('Download URL:', downloadUrl); // Debug log
-            
+
             // Buka URL download
             window.location.href = downloadUrl;
         });
