@@ -12,6 +12,13 @@
         </script>
     @endif
 
+    @if ($errors->has('no_induk'))
+    <script>
+        alert('No Induk yang dimasukkan sudah ada. Silakan pilih No Induk yang lain.');
+    </script>
+    @endif
+
+
     <form action="{{ route('omsets.store') }}" method="POST">
         @csrf
         <div class="mb-3">

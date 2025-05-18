@@ -55,74 +55,84 @@ class OmsetController extends Controller
 
     // Menyimpan data omset baru
     public function store(Request $request)
-    {
-        // Validasi input
-        $request->validate([
-            'tanggal' => 'required|date',
-            'klien_id' => 'required|exists:kliens,id',  // Validasi klien_id
-            'alamat' => 'required|string',
-            'project' => 'required|string|max:255',
-            'sumber_lead' => 'required|string|max:255',
-            'nominal' => 'required|numeric',  // Validasi nominal
-        ]);
+{
+    // Validasi input
+    $request->validate([
+        'tanggal' => 'required|date',
+        'klien_id' => 'required|exists:kliens,id',  // Validasi klien_id
+        'alamat' => 'required|string',
+        'project' => 'required|string|max:255',
+        'sumber_lead' => 'required|string|max:255',
+        'nominal' => 'required|numeric',  // Validasi nominal
+    ]);
 
-        // Ambil data nama klien dan no_induk berdasarkan klien_id
-        $klien = Klien::find($request->klien_id);
+    // Ambil data nama klien dan no_induk berdasarkan klien_id
+    $klien = Klien::find($request->klien_id);
 
-        // Menyimpan data omset
-        Omset::create([
-            'tanggal' => $request->tanggal,
-            'klien_id' => $request->klien_id,  // Menyimpan ID klien
-            'no_induk' => $klien->no_induk,  // Mengambil no_induk klien
-            'nama_klien' => $klien->nama_klien,  // Menambahkan nama klien secara otomatis
-            'alamat' => $request->alamat,
-            'project' => $request->project,
-            'sumber_lead' => $request->sumber_lead,
-            'nominal' => $request->nominal,
-        ]);
+    // Cek apakah no_induk sudah ada dalam tabel omsets
+    $existingOmset = Omset::where('no_induk', $klien->no_induk)->first();
 
-        return redirect()->route('omsets.index')->with('success', 'Data omset berhasil ditambahkan!');
+    if ($existingOmset) {
+        // Jika no_induk sudah ada, beri pesan error
+        return redirect()->back()->withErrors(['no_induk' => 'No Induk ' . $klien->no_induk . ' sudah ada. Silakan pilih klien lain.']);
     }
+
+    // Menyimpan data omset jika tidak ada duplikasi
+    Omset::create([
+        'tanggal' => $request->tanggal,
+        'klien_id' => $request->klien_id,  // Menyimpan ID klien
+        'no_induk' => $klien->no_induk,  // Mengambil no_induk klien
+        'nama_klien' => $klien->nama_klien,  // Menambahkan nama klien secara otomatis
+        'alamat' => $request->alamat,
+        'project' => $request->project,
+        'sumber_lead' => $request->sumber_lead,
+        'nominal' => $request->nominal,
+    ]);
+
+    return redirect()->route('omsets.index')->with('success', 'Data omset berhasil ditambahkan!');
+}
 
     // Menampilkan form untuk mengedit omset
-    public function edit(Omset $omset)
+    public function edit($id)
     {
-        // Mengambil data klien untuk dropdown
-        $kliens = Klien::all();
+        $omset = Omset::findOrFail($id);
+        $kliens = Klien::all();  // Ambil semua klien untuk dropdown
         return view('omsets.edit', compact('omset', 'kliens'));
     }
-
+    
     // Memperbarui data omset
     public function update(Request $request, Omset $omset)
     {
-        // Validasi input
+        // Validasi input dengan mengubah klien_id menjadi opsional
         $request->validate([
             'tanggal' => 'required|date',
-            'klien_id' => 'required|exists:kliens,id',  // Validasi klien_id
+            'klien_id' => 'nullable|exists:kliens,id',  // Klien opsional, hanya valid jika dipilih
             'alamat' => 'required|string',
             'project' => 'required|string|max:255',
             'sumber_lead' => 'required|string|max:255',
             'nominal' => 'required|numeric',  // Validasi nominal
         ]);
-
-        // Ambil data nama klien dan no_induk berdasarkan klien_id
-        $klien = Klien::find($request->klien_id);
-
-        // Memperbarui data omset
+    
+        // Ambil data nama klien dan no_induk berdasarkan klien_id jika dipilih
+        if ($request->klien_id) {
+            $klien = Klien::find($request->klien_id);
+            $omset->klien_id = $klien->id;
+            $omset->no_induk = $klien->no_induk;
+            $omset->nama_klien = $klien->nama_klien;
+            $omset->alamat = $klien->alamat;
+        }
+    
+        // Memperbarui data omset lainnya
         $omset->update([
             'tanggal' => $request->tanggal,
-            'klien_id' => $request->klien_id,  // Menyimpan ID klien
-            'no_induk' => $klien->no_induk,  // Mengambil no_induk klien
-            'nama_klien' => $klien->nama_klien,  // Menambahkan nama klien secara otomatis
-            'alamat' => $request->alamat,
             'project' => $request->project,
             'sumber_lead' => $request->sumber_lead,
             'nominal' => $request->nominal,
         ]);
-
+    
         return redirect()->route('omsets.index')->with('success', 'Data omset berhasil diperbarui!');
     }
-
+    
     // Menghapus data omset
     public function destroy(Omset $omset)
     {
@@ -265,3 +275,5 @@ class OmsetController extends Controller
         return response()->json(['message' => 'Chart uploaded successfully']);
     }
 }
+
+
