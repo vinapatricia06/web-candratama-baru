@@ -6,12 +6,6 @@
     <div class="container">
         <h2>Tambah Maintenance Project</h2>
 
-        @if ($errors->has('no_induk'))
-            <script>
-                alert('No Induk sudah terdaftar, harap gunakan yang berbeda.');
-            </script>
-        @endif
-
         @if ($errors->has('dokumentasi'))
             <script>
                   alert('Ukuran gambar yang diunggah melebihi batas maksimum 1.5MB. Silakan kompres gambar terlebih dahulu.');
@@ -63,7 +57,7 @@
             </div>
 
             <div class="mb-3">
-                <label>Dokumentasi (Opsional)</label>
+                <label>Dokumentasi (Opsional: Anda dapat mengunggah gambar dengan ukuran maksimal 1.5 MB.) </label>
                 <input type="file" name="dokumentasi" class="form-control">
             </div>
 

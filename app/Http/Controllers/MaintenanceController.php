@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ class MaintenanceController extends Controller
     {
         $query = Maintenance::query();
 
-        // Filter based on month and date (optional)
+        // Filter berdasarkan bulan dan tanggal (opsional)
         $bulan = $request->get('bulan');
         $tanggal = $request->get('tanggal');
 
@@ -32,16 +33,16 @@ class MaintenanceController extends Controller
 
     public function create()
     {
-        $kliens = Klien::all();  // Fetch all clients
+        $kliens = Klien::all();  // Mengambil semua klien
         return view('maintenances.create', compact('kliens'));
     }
 
     public function store(Request $request)
     {
-        // Validate input
+        // Validasi input
         $request->validate([
             'nama_klien' => 'required|string|max:255',
-            'no_induk' => 'required|string|unique:maintenances,no_induk',
+            'no_induk' => 'required|string', // Menghilangkan validasi unique untuk no_induk
             'alamat' => 'required|string',
             'project' => 'required|string|max:255',
             'tanggal_setting' => 'required|date',
@@ -50,13 +51,20 @@ class MaintenanceController extends Controller
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
         ]);
 
-        // Store the data
+        // Cek jika no_induk sudah ada di Klien, jika sudah ada beri peringatan
+        $klien = Klien::where('no_induk', $request->no_induk)->first();
+        if ($klien) {
+            // Bila no_induk ada, beri peringatan tapi izinkan proses lanjut
+            session()->flash('warning', 'No Induk sudah terdaftar sebagai klien, tetapi akan tetap diproses');
+        }
+
+        // Menyimpan data Maintenance
         $data = $request->except(['dokumentasi']);
 
         if ($request->hasFile('dokumentasi')) {
             $file = $request->file('dokumentasi');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('image'), $filename); // Save the file in the "image" folder
+            $file->move(public_path('image'), $filename); // Simpan file di folder "image"
             $data['dokumentasi'] = 'image/' . $filename;
         }
 
@@ -68,16 +76,16 @@ class MaintenanceController extends Controller
 
     public function edit($id)
     {
-        // Find the maintenance project to edit
+        // Temukan proyek maintenance yang akan diedit
         $maintenance = Maintenance::findOrFail($id);
-        $kliens = Klien::all();  // Get all clients for the dropdown
+        $kliens = Klien::all();  // Ambil semua klien untuk dropdown
 
         return view('maintenances.edit', compact('maintenance', 'kliens'));
     }
 
     public function update(Request $request, $id)
     {
-        // Validate input
+        // Validasi input
         $request->validate([
             'nama_klien' => 'required|string|max:255',
             'alamat' => 'required|string',
@@ -88,24 +96,24 @@ class MaintenanceController extends Controller
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
         ]);
 
-        // Find the maintenance project to update
+        // Temukan proyek maintenance yang akan diperbarui
         $maintenance = Maintenance::findOrFail($id);
         $data = $request->except(['dokumentasi']);
 
         if ($request->hasFile('dokumentasi')) {
-            // Delete old file if exists
+            // Hapus file lama jika ada
             if ($maintenance->dokumentasi && File::exists(public_path($maintenance->dokumentasi))) {
                 File::delete(public_path($maintenance->dokumentasi));
             }
 
-            // Save new file
+            // Simpan file baru
             $file = $request->file('dokumentasi');
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('storage/dokumentasi'), $filename);
             $data['dokumentasi'] = 'storage/dokumentasi/' . $filename;
         }
 
-        // Update the maintenance data
+        // Update data maintenance
         $maintenance->update($data);
 
         return redirect()->route('maintenances.index')
@@ -114,7 +122,7 @@ class MaintenanceController extends Controller
 
     public function destroy($id)
     {
-        // Delete maintenance project
+        // Hapus proyek maintenance
         $maintenance = Maintenance::findOrFail($id);
         if ($maintenance->dokumentasi && File::exists(public_path($maintenance->dokumentasi))) {
             File::delete(public_path($maintenance->dokumentasi));
@@ -150,10 +158,10 @@ class MaintenanceController extends Controller
 
     public function hapusBulan(Request $request)
     {
-        // Get the month from the request
+        // Ambil bulan dari request
         $bulan = $request->input('bulan');
 
-        // Delete all maintenance records for the selected month
+        // Hapus semua data maintenance untuk bulan yang dipilih
         Maintenance::whereMonth('tanggal_setting', $bulan)->delete();
 
         return redirect()->route('maintenances.index')
