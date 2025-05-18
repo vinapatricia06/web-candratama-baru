@@ -275,5 +275,3 @@ class OmsetController extends Controller
         return response()->json(['message' => 'Chart uploaded successfully']);
     }
 }
-
-
