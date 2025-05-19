@@ -70,12 +70,11 @@ class OmsetController extends Controller
     $klien = Klien::find($request->klien_id);
 
     // Cek apakah no_induk sudah ada dalam tabel omsets
-    $existingOmset = Omset::where('no_induk', $klien->no_induk)->first();
+    // $existingOmset = Omset::where('no_induk', $klien->no_induk)->first();
 
-    if ($existingOmset) {
-        // Jika no_induk sudah ada, beri pesan error
-        return redirect()->back()->withErrors(['no_induk' => 'No Induk ' . $klien->no_induk . ' sudah ada. Silakan pilih klien lain.']);
-    }
+    // if ($existingOmset) {
+    //     return redirect()->back()->withErrors(['no_induk' => 'No Induk ' . $klien->no_induk . ' sudah ada. Silakan pilih klien lain.']);
+    // }
 
     // Menyimpan data omset jika tidak ada duplikasi
     Omset::create([
