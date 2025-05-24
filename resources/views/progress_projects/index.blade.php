@@ -35,7 +35,8 @@
                         <!-- Filter Tanggal -->
                         <div class="col-md-4 mb-3">
                             <label for="tanggal">Tanggal Setting:</label>
-                            <input type="date" name="tanggal" id="tanggal" class="form-control" value="{{ request('tanggal') }}">
+                            <input type="date" name="tanggal" id="tanggal" class="form-control"
+                                value="{{ request('tanggal') }}">
                         </div>
 
                         <!-- Filter Teknisi -->
@@ -44,7 +45,8 @@
                             <select name="teknisi_id" id="teknisi_id" class="form-control">
                                 <option value="">Semua Teknisi</option>
                                 @foreach ($teknisiList as $teknisi)
-                                    <option value="{{ $teknisi->id_user }}" {{ request('teknisi_id') == $teknisi->id_user ? 'selected' : '' }}>
+                                    <option value="{{ $teknisi->id_user }}"
+                                        {{ request('teknisi_id') == $teknisi->id_user ? 'selected' : '' }}>
                                         {{ $teknisi->nama }}
                                     </option>
                                 @endforeach
@@ -72,11 +74,13 @@
         @endif
 
         <!-- Tombol untuk hapus semua data bulan yang dipilih -->
-        @if(request()->get('bulan'))
+        @if (request()->get('bulan'))
             <form action="{{ route('progress_projects.hapusBulan') }}" method="POST" class="mb-3">
                 @csrf
                 <input type="hidden" name="bulan" value="{{ request()->get('bulan') }}">
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus semua data bulan ini? Semua data akan hilang.')">Hapus Semua Data Bulan Ini</button>
+                <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Yakin ingin menghapus semua data bulan ini? Semua data akan hilang.')">Hapus
+                    Semua Data Bulan Ini</button>
             </form>
         @endif
 
@@ -100,6 +104,8 @@
                         <th>Tanggal Setting</th>
                         <th>Dokumentasi</th>
                         <th>Status</th>
+                        <th>Nominal</th>
+                        <th>Status Pembayaran</th>
                         <th>Serah Terima</th>
                         <th>Aksi</th>
                     </tr>
@@ -109,8 +115,8 @@
                         <tr>
                             <td>{{ $key + 1 }}</td>
                             <td>{{ $project->teknisi->nama ?? 'Tidak Ada' }}</td>
-                            <td>{{ $project->nama_klien }}</td>
-                            <td>{{ $project->alamat }}</td>
+                            <td>{{ $project->klien->nama_klien ?? 'Tidak Ada' }}</td>
+                            <td>{{ $project->klien->alamat ?? 'Tidak Ada' }}</td>
                             <td>{{ $project->project }}</td>
                             <td>{{ $project->tanggal_setting }}</td>
                             <td>
@@ -124,8 +130,13 @@
                                 @endif
                             </td>
                             <td>{{ $project->status }}</td>
+                            <td>Rp {{ number_format($project->nominal, 0, ',', '.') }}</td>
+                            <td>{{ $project->status_pembayaran }}</td>
                             <td>{{ $project->serah_terima }}</td>
                             <td>
+                                @if ($project->status_pembayaran == 'Menunggu Pembayaran')
+                                    <button class="btn btn-dark" onclick="pembayaran()">Pembayaran</button>
+                                @endif
                                 <a href="{{ route('progress_projects.edit', $project->id) }}"
                                     class="btn btn-warning btn-sm">Edit</a>
                                 <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST"
@@ -199,5 +210,13 @@
             // Buka URL download
             window.location.href = downloadUrl;
         });
+    </script>
+@endsection
+
+@section('script')
+    <script>
+        function pembayaran() {
+            alert('Proses pembayaran sedang dalam pengembangan.');
+        }
     </script>
 @endsection

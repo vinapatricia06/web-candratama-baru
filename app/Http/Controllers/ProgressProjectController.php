@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Log;
 
 class ProgressProjectController extends Controller
 {
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         try {
             Log::info('Filter parameters:', $request->all());
 
@@ -21,7 +22,7 @@ class ProgressProjectController extends Controller
 
             // Build query
             $query = ProgressProject::query();
-            $query->with('teknisi');  // Eager load teknisi relation
+            $query->with('teknisi', 'klien');  // Eager load teknisi relation
 
             // Apply filters
             if ($request->filled('bulan')) {
@@ -40,31 +41,32 @@ class ProgressProjectController extends Controller
             $projects = $query->get();
 
             return view('progress_projects.index', compact('projects', 'teknisiList'));
-
         } catch (\Exception $e) {
             Log::error('Error in index method: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
-    public function create() {
+    public function create()
+    {
         // Get all technicians and clients for the dropdowns
         $teknisiList = User1::where('role', 'teknisi')->get();
         $kliens = Klien::all();
         return view('progress_projects.create', compact('teknisiList', 'kliens'));
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         // Validate input
         $request->validate([
             'teknisi_id' => 'required|exists:users1,id_user',
-            'nama_klien' => 'required|string|max:255',
-            'alamat' => 'required|string',
+            'klien_id' => 'required|exists:kliens,id',
             'project' => 'required|string|max:255',
             'tanggal_setting' => 'required|date',
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
             'status' => 'required|string|max:255',
-            'serah_terima' => 'required|in:selesai,belum', 
+            'nominal' => 'required|numeric',
+            'serah_terima' => 'required|in:selesai,belum',
         ]);
 
         // Store the data
@@ -81,10 +83,11 @@ class ProgressProjectController extends Controller
         ProgressProject::create($data);
 
         return redirect()->route('progress_projects.index')
-                         ->with('success', 'Project berhasil ditambahkan.');
+            ->with('success', 'Project berhasil ditambahkan.');
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         // Find the progress project to edit
         $progress_project = ProgressProject::findOrFail($id);
         $teknisiList = User1::where('role', 'teknisi')->get();
@@ -93,16 +96,17 @@ class ProgressProjectController extends Controller
         return view('progress_projects.edit', compact('progress_project', 'teknisiList', 'kliens'));
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id)
+    {
         // Validate input
         $request->validate([
             'teknisi_id' => 'required|exists:users1,id_user',
-            'nama_klien' => 'required|string|max:255',
-            'alamat' => 'required|string',
+            'klien_id' => 'required|exists:kliens,id',
             'project' => 'required|string|max:255',
             'tanggal_setting' => 'required|date',
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
             'status' => 'required|string|max:255',
+            'nominal' => 'required|numeric',
             'serah_terima' => 'required|in:selesai,belum',
         ]);
 
@@ -128,10 +132,11 @@ class ProgressProjectController extends Controller
         $progress_project->update($data);
 
         return redirect()->route('progress_projects.index')
-                         ->with('success', 'Project berhasil diperbarui.');
+            ->with('success', 'Project berhasil diperbarui.');
     }
 
-    public function destroy($id) {
+    public function destroy($id)
+    {
         // Find and delete the progress project
         $progress_project = ProgressProject::findOrFail($id);
         if ($progress_project->dokumentasi && File::exists(public_path($progress_project->dokumentasi))) {
@@ -141,7 +146,7 @@ class ProgressProjectController extends Controller
         $progress_project->delete();
 
         return redirect()->route('progress_projects.index')
-                         ->with('success', 'Project berhasil dihapus.');
+            ->with('success', 'Project berhasil dihapus.');
     }
 
     public function downloadPdf(Request $request)
@@ -150,7 +155,7 @@ class ProgressProjectController extends Controller
             Log::info('PDF Download parameters:', $request->all());
 
             // Build query
-            $query = ProgressProject::query()->with('teknisi');
+            $query = ProgressProject::query()->with('teknisi', 'klien');
 
             // Apply filters
             if ($request->filled('bulan')) {
@@ -208,13 +213,11 @@ class ProgressProjectController extends Controller
                 }
             }
             $filename .= '.pdf';
-
             // Generate PDF
             $pdf = PDF::loadView('progress_projects.pdf', compact('projects', 'filterInfo'))
-                      ->setPaper('A4', 'landscape');
+                ->setPaper('A4', 'landscape');
 
             return $pdf->download($filename);
-
         } catch (\Exception $e) {
             Log::error('Error in downloadPdf method: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan saat membuat PDF: ' . $e->getMessage());
@@ -231,8 +234,7 @@ class ProgressProjectController extends Controller
             Log::info('Deleted ' . $deleted . ' projects');
 
             return redirect()->route('progress_projects.index')
-                             ->with('success', 'Semua data bulan ini telah dihapus.');
-
+                ->with('success', 'Semua data bulan ini telah dihapus.');
         } catch (\Exception $e) {
             Log::error('Error in hapusBulan method: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());

@@ -61,10 +61,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/progress_projects/{progressProject}', [ProgressProjectController::class, 'update'])->name('progress_projects.update');
     Route::delete('/progress_projects/{progressProject}', [ProgressProjectController::class, 'destroy'])->name('progress_projects.destroy');
     Route::post('progress_projects/hapusBulan', [ProgressProjectController::class, 'hapusBulan'])->name('progress_projects.hapusBulan');
+    Route::post('progress_projects/payment', [ProgressProjectController::class, 'payment'])->name('progress_projects.payment');
 });
-    Route::get('/progress_projects', [ProgressProjectController::class, 'index'])->name('progress_projects.index');
-    Route::get('/progress-projects/download', [ProgressProjectController::class, 'downloadPdf'])->name('progress_projects.downloadPdf');
-    
+Route::get('/progress_projects', [ProgressProjectController::class, 'index'])->name('progress_projects.index');
+Route::get('/progress-projects/download', [ProgressProjectController::class, 'downloadPdf'])->name('progress_projects.downloadPdf');
+
 Route::middleware(['auth', 'role:admin,marketing'])->group(function () {
     Route::get('/maintenances/create', [MaintenanceController::class, 'create'])->name('maintenances.create');
     Route::post('/maintenances', [MaintenanceController::class, 'store'])->name('maintenances.store');
@@ -75,18 +76,18 @@ Route::middleware(['auth', 'role:admin,marketing'])->group(function () {
 });
 Route::get('/maintenances', [MaintenanceController::class, 'index'])->name('maintenances.index');
 Route::get('/maintenances/download', [MaintenanceController::class, 'downloadPdf'])->name('maintenances.downloadPdf');
-    
+
 Route::middleware(['auth', 'role:marketing,admin,finance,warehouse,purchasing,interior_consultan'])->group(function () {
     Route::get('/digital-marketing/list', [SuratMarketingController::class, 'list'])->name('surat.digital_marketing.list');
     Route::put('/surat/marketing/updateStatusPengajuan/{id}', [SuratMarketingController::class, 'updateStatusPengajuan'])->name('surat.marketing.updateStatusPengajuan');
     Route::get('/surat-marketing/download/{id}', [SuratMarketingController::class, 'downloadfile'])->name('surat.marketing.downloadfile');
     Route::get('/surat-marketing/view/{id}', [SuratMarketingController::class, 'viewPDF'])->name('surat.marketing.viewPDF');
-    
+
     Route::get('/surat/finance', [SuratFinanceController::class, 'index'])->name('surat.finance.index');
     Route::get('/surat/finance/downloadfile/{id}', [SuratFinanceController::class, 'downloadfile'])->name('surat.finance.downloadfile');
     Route::get('/surat/finance/viewpdf/{id}', [SuratFinanceController::class, 'viewPDF'])->name('surat.finance.viewPDF');
-    Route::put('/surat/finance/{id}/update-status', [SuratFinanceController::class, 'updateStatusPengajuan'])->name('surat.finance.updateStatusPengajuan'); 
-    
+    Route::put('/surat/finance/{id}/update-status', [SuratFinanceController::class, 'updateStatusPengajuan'])->name('surat.finance.updateStatusPengajuan');
+
     Route::get('/surat/admin', [SuratAdminController::class, 'index'])->name('surat.admin.index');
     Route::get('/surat/admin/downloadfile/{id}', [SuratAdminController::class, 'downloadfile'])->name('surat.admin.downloadfile');
     Route::get('/surat/admin/viewpdf/{id}', [SuratAdminController::class, 'viewPDF'])->name('surat.admin.viewPDF');
@@ -96,12 +97,11 @@ Route::middleware(['auth', 'role:marketing,admin,finance,warehouse,purchasing,in
     Route::get('/surat-warehouse/download/{id}', [SuratWarehouseController::class, 'downloadfile'])->name('surat.warehouse.download');
     Route::put('/surat-warehouse/status/{id}', [SuratWarehouseController::class, 'updateStatusPengajuan'])->name('surat.warehouse.updateStatus');
     Route::get('/surat-warehouse/view/{id}', [SuratWarehouseController::class, 'viewPDF'])->name('surat.warehouse.view');
-    
+
     Route::get('/surat/purchasing', [SuratPurchasingController::class, 'index'])->name('surat.purchasing.index');
     Route::get('/surat/purchasing/download/{id}', [SuratPurchasingController::class, 'downloadfile'])->name('surat.purchasing.download');
     Route::put('/surat/purchasing/update-status/{id}', [SuratPurchasingController::class, 'updateStatusPengajuan'])->name('surat.purchasing.updateStatus');
     Route::get('/surat/purchasing/view/{id}', [SuratPurchasingController::class, 'viewPDF'])->name('surat.purchasing.view');
-    
 });
 
 Route::middleware(['auth', 'role:marketing'])->group(function () {
@@ -168,7 +168,6 @@ Route::middleware(['auth', 'role:ekspedisi'])->group(function () {
     Route::post('/surat-ekspedisi', [SuratEkspedisiController::class, 'store'])->name('surat.ekspedisi.store');
     Route::get('/surat-ekspedisi/{id}/edit', [SuratEkspedisiController::class, 'edit'])->name('surat.ekspedisi.edit');
     Route::put('/surat-ekspedisi/{id}', [SuratEkspedisiController::class, 'update'])->name('surat.ekspedisi.update');
-
 });
 
 Route::get('/surat-ekspedisi', [SuratEkspedisiController::class, 'index'])->name('surat.ekspedisi.index');
@@ -176,7 +175,7 @@ Route::delete('/surat-ekspedisi/{id}', [SuratEkspedisiController::class, 'destro
 Route::put('/surat-ekspedisi/{id}/status', [SuratEkspedisiController::class, 'updateStatusPengajuan'])->name('surat.ekspedisi.updateStatus');
 Route::get('/surat/ekspesidi/download/{id}', [SuratEkspedisiController::class, 'downloadfile'])->name('surat.ekspedisi.download');
 Route::get('/surat/ekspedisi/view/{id}', [SuratEkspedisiController::class, 'viewPDF'])->name('surat.ekspedisi.view');
-    
+
 
 Route::middleware(['auth', 'role:cleaning_services'])->group(function () {
     Route::get('surat/cleaning/create', [SuratCleaningController::class, 'create'])->name('surat.cleaning.create'); // To show the create form
@@ -195,7 +194,6 @@ Route::middleware(['auth', 'role:interior_consultan'])->group(function () {
     Route::post('surat/interior_consultan', [SuratInteriorConsultanController::class, 'store'])->name('surat.interior_consultan.store');
     Route::get('surat/interior_consultan/{id}/edit', [SuratInteriorConsultanController::class, 'edit'])->name('surat.interior_consultan.edit');
     Route::put('surat/interior_consultan/{id}', [SuratInteriorConsultanController::class, 'update'])->name('surat.interior_consultan.update');
-
 });
 
 

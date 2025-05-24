@@ -87,6 +87,8 @@
                 <th>Project</th>
                 <th>Tanggal Setting</th>
                 <th>Dokumentasi</th>
+                <th>Nominal</th>
+                <th>Status Pembayaran</th>
                 <th>Status</th>
             </tr>
         </thead>
@@ -95,8 +97,8 @@
                 <tr>
                     <td>{{ $key + 1 }}</td>
                     <td>{{ $project->teknisi->nama ?? 'Tidak Ada' }}</td>
-                    <td>{{ $project->nama_klien }}</td>
-                    <td>{{ $project->alamat }}</td>
+                    <td>{{ $project->klien->nama_klien ?? 'Tidak Ada' }}</td>
+                    <td>{{ $project->klien->alamat ?? 'Tidak Ada' }}</td>
                     <td>{{ $project->project }}</td>
                     <td>{{ $project->tanggal_setting }}</td>
                     <td>
@@ -106,6 +108,8 @@
                             Tidak ada gambar
                         @endif
                     </td>
+                    <td>Rp {{ number_format($project->nominal, 0, ',', '.') }}</td>
+                    <td>{{ $project->status_pembayaran }}</td>
                     <td>{{ $project->status }}</td>
                 </tr>
             @endforeach

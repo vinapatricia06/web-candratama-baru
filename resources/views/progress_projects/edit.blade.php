@@ -13,7 +13,8 @@
             </script>
         @endif
 
-        <form action="{{ route('progress_projects.update', $progress_project->id) }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('progress_projects.update', $progress_project->id) }}" method="POST"
+            enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
@@ -23,7 +24,8 @@
                 <select name="teknisi_id" class="form-control" required>
                     <option value="">-- Pilih Teknisi --</option>
                     @foreach ($teknisiList as $teknisi)
-                        <option value="{{ $teknisi->id_user }}" {{ $progress_project->teknisi_id == $teknisi->id_user ? 'selected' : '' }}>
+                        <option value="{{ $teknisi->id_user }}"
+                            {{ $progress_project->teknisi_id == $teknisi->id_user ? 'selected' : '' }}>
                             {{ $teknisi->nama }}
                         </option>
                     @endforeach
@@ -33,13 +35,12 @@
             <!-- Klien Dropdown -->
             <div class="mb-3">
                 <label>Nama Klien</label>
-                <select name="nama_klien" id="nama_klien" class="form-control" required>
+                <select name="klien_id" id="klien_id" class="form-control" required>
                     <option value="">-- Pilih Klien --</option>
-                    @foreach($kliens as $klien)
-                        <option value="{{ $klien->nama_klien }}" 
-                                data-no_induk="{{ $klien->no_induk }}" 
-                                data-alamat="{{ $klien->alamat }}"
-                                {{ $progress_project->nama_klien == $klien->nama_klien ? 'selected' : '' }}>
+                    @foreach ($kliens as $klien)
+                        <option value="{{ $klien->id }}" data-no_induk="{{ $klien->no_induk }}"
+                            data-alamat="{{ $klien->alamat }}"
+                            {{ $progress_project->klien_id == $klien->id ? 'selected' : '' }}>
                             {{ $klien->nama_klien }}
                         </option>
                     @endforeach
@@ -48,19 +49,21 @@
             <!-- Alamat -->
             <div class="mb-3">
                 <label>Alamat</label>
-                <textarea name="alamat" id="alamat" class="form-control" required readonly>{{ old('alamat', $progress_project->alamat) }}</textarea>
+                <textarea id="alamat" class="form-control" required readonly>{{ $progress_project->klien->alamat }}</textarea>
             </div>
 
             <!-- Project -->
             <div class="mb-3">
                 <label>Project</label>
-                <input type="text" name="project" class="form-control" value="{{ old('project', $progress_project->project) }}" required>
+                <input type="text" name="project" class="form-control"
+                    value="{{ old('project', $progress_project->project) }}" required>
             </div>
 
             <!-- Tanggal Setting -->
             <div class="mb-3">
                 <label>Tanggal Setting</label>
-                <input type="date" name="tanggal_setting" class="form-control" value="{{ old('tanggal_setting', $progress_project->tanggal_setting) }}" required>
+                <input type="date" name="tanggal_setting" class="form-control"
+                    value="{{ old('tanggal_setting', $progress_project->tanggal_setting) }}" required>
             </div>
 
             <!-- Dokumentasi -->
@@ -79,15 +82,27 @@
             <!-- Status -->
             <div class="mb-3">
                 <label>Status</label>
-                <input type="text" name="status" class="form-control" value="{{ old('status', $progress_project->status) }}" required>
+                <input type="text" name="status" class="form-control"
+                    value="{{ old('status', $progress_project->status) }}" required>
+            </div>
+
+            <!-- Nominal -->
+            <div class="mb-3">
+                <label>Nominal</label>
+                <input type="number" name="nominal" class="form-control"
+                    value="{{ old('nominal', $progress_project->nominal) }}" required>
             </div>
 
             <!-- Serah Terima -->
             <div class="form-group">
                 <label for="serah_terima">Serah Terima</label>
                 <select name="serah_terima" id="serah_terima" class="form-control">
-                    <option value="selesai" {{ old('serah_terima', $progress_project->serah_terima ?? '') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                    <option value="belum" {{ old('serah_terima', $progress_project->serah_terima ?? '') == 'belum' ? 'selected' : '' }}>Belum</option>
+                    <option value="selesai"
+                        {{ old('serah_terima', $progress_project->serah_terima ?? '') == 'selesai' ? 'selected' : '' }}>
+                        Selesai</option>
+                    <option value="belum"
+                        {{ old('serah_terima', $progress_project->serah_terima ?? '') == 'belum' ? 'selected' : '' }}>Belum
+                    </option>
                 </select>
             </div>
 
@@ -100,12 +115,10 @@
         // Ensure the script runs after DOM content is loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Isi otomatis No Induk dan Alamat berdasarkan pilihan Nama Klien
-            document.getElementById('nama_klien').addEventListener('change', function () {
+            document.getElementById('klien_id').addEventListener('change', function() {
                 const selected = this.options[this.selectedIndex];
-                const noInduk = selected.getAttribute('data-no_induk');
                 const alamat = selected.getAttribute('data-alamat');
 
-                document.getElementById('no_induk').value = noInduk || '';
                 document.getElementById('alamat').value = alamat || '';
             });
         });

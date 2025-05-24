@@ -8,7 +8,7 @@
 
         @if ($errors->has('dokumentasi'))
             <script>
-                  alert('Ukuran gambar yang diunggah melebihi batas maksimum 1.5MB. Silakan kompres gambar terlebih dahulu.');
+                alert('Ukuran gambar yang diunggah melebihi batas maksimum 1.5MB. Silakan kompres gambar terlebih dahulu.');
             </script>
         @endif
 
@@ -25,22 +25,22 @@
             </div>
 
             <div class="mb-3">
-                <label for="nama_klien">Nama Klien</label>
-                <select name="nama_klien" id="nama_klien" class="form-control" required>
+                <label for="klien_id">Nama Klien</label>
+                <select name="klien_id" id="klien_id" class="form-control" required>
                     <option value="">-- Pilih Nama Klien --</option>
-                    @foreach($kliens as $klien)
-                        <option value="{{ $klien->nama_klien }}" data-alamat="{{ $klien->alamat }}">
+                    @foreach ($kliens as $klien)
+                        <option value="{{ $klien->id }}" data-alamat="{{ $klien->alamat }}">
                             {{ $klien->nama_klien }}
                         </option>
                     @endforeach
                 </select>
             </div>
-            
+
             <div class="mb-3">
                 <label for="alamat">Alamat</label>
-                <textarea id="alamat" name="alamat" class="form-control" required readonly></textarea>
+                <textarea id="alamat" class="form-control" required readonly></textarea>
             </div>
-            
+
 
             <div class="mb-3">
                 <label>Project</label>
@@ -63,6 +63,11 @@
             </div>
 
             <div class="mb-3">
+                <label>Nominal</label>
+                <input type="number" name="nominal" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
                 <label>Serah Terima</label>
                 <select name="serah_terima" class="form-control" required>
                     <option value="belum" selected>Belum</option>
@@ -76,11 +81,11 @@
     </div>
 
     <script>
-        document.getElementById('nama_klien').addEventListener('change', function() {
+        document.getElementById('klien_id').addEventListener('change', function() {
             const selected = this.options[this.selectedIndex];
             const alamat = selected.getAttribute('data-alamat');
             document.getElementById('alamat').value = alamat;
         });
     </script>
-    
+
 @endsection
