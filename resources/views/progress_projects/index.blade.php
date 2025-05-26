@@ -134,18 +134,28 @@
                             <td>{{ $project->status_pembayaran }}</td>
                             <td>{{ $project->serah_terima }}</td>
                             <td>
-                                @if ($project->status_pembayaran == 'Menunggu Pembayaran')
-                                    <button class="btn btn-dark" onclick="pembayaran()">Pembayaran</button>
-                                @endif
-                                <a href="{{ route('progress_projects.edit', $project->id) }}"
-                                    class="btn btn-warning btn-sm">Edit</a>
-                                <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST"
-                                    style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
-                                </form>
+                                <div class="btn-group" role="group">
+                                    @if ($project->status_pembayaran == 'Menunggu Pembayaran')
+                                        <button class="btn btn-dark btn-sm" onclick="pembayaran()">
+                                            <i class="fas fa-money-bill-wave"></i> Pembayaran
+                                        </button>
+                                    @endif
+
+                                    <a href="{{ route('progress_projects.edit', $project->id) }}"
+                                        class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+
+                                    <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST"
+                                        style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Yakin ingin menghapus?')">
+                                            <i class="fas fa-trash"></i> Hapus
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
