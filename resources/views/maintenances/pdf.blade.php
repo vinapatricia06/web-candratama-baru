@@ -106,9 +106,9 @@
             @foreach ($maintenances as $key => $maintenance)
                 <tr>
                     <td>{{ $key + 1 }}</td>
-                    <td>{{ $maintenance->nama_klien }}</td>
-                    <td>{{ $maintenance->alamat }}</td> <!-- No line below this column -->
-                    <td>{{ $maintenance->project }}</td>
+                    <td>{{ $maintenance->project->klien->nama_klien }}</td>
+                    <td>{{ $maintenance->project->klien->alamat }}</td> <!-- No line below this column -->
+                    <td>{{ $maintenance->project->project }}</td>
                     <td>{{ $maintenance->tanggal_setting }}</td>
                     <td>{{ $maintenance->maintenance }}</td>
                     <td>

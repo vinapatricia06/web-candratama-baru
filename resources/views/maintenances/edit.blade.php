@@ -1,7 +1,5 @@
 @extends('layouts.admin.app')
-
 @section('title', 'Edit Maintenance Project')
-
 @section('content')
     <div class="container">
         <h2>Edit Maintenance Project</h2>
@@ -26,12 +24,13 @@
             <!-- Klien Dropdown -->
             <div class="mb-3">
                 <label>Nama Klien</label>
-                <select name="nama_klien" id="nama_klien" class="form-control" required>
+                <select name="klien_id" id="klien_id" class="form-control" required>
                     <option value="">-- Pilih Klien --</option>
-                    @foreach($kliens as $klien)
-                        <option value="{{ $klien->nama_klien }}" data-no_induk="{{ $klien->no_induk }}" data-alamat="{{ $klien->alamat }}"
-                            {{ $maintenance->nama_klien == $klien->nama_klien ? 'selected' : '' }}>
-                            {{ $klien->nama_klien }}
+                    @foreach ($kliens as $item)
+                        <option value="{{ $item->klien_id }}" data-no_induk="{{ $item->klien->no_induk }}"
+                            data-alamat="{{ $item->klien->alamat }}"
+                            {{ $maintenance->project->klien_id == $item->klien_id ? 'selected' : '' }}>
+                            {{ $item->klien->nama_klien }}
                         </option>
                     @endforeach
                 </select>
@@ -40,7 +39,8 @@
             <!-- No Induk -->
             <div class="mb-3">
                 <label>No Induk</label>
-                <input type="text" name="no_induk" id="no_induk" class="form-control" value="{{ old('no_induk', $maintenance->no_induk) }}" required readonly>
+                <input type="text" id="no_induk" class="form-control"
+                    value="{{ $maintenance->project->klien->no_induk }}" required readonly>
                 @error('no_induk')
                     <div class="text-danger">{{ $message }}</div>
                 @enderror
@@ -49,25 +49,29 @@
             <!-- Alamat -->
             <div class="mb-3">
                 <label>Alamat</label>
-                <textarea name="alamat" id="alamat" class="form-control" required readonly>{{ old('alamat', $maintenance->alamat) }}</textarea>
+                <textarea id="alamat" class="form-control" required readonly>{{ $maintenance->project->klien->alamat }}</textarea>
             </div>
 
             <!-- Project -->
             <div class="mb-3">
                 <label>Project</label>
-                <input type="text" name="project" class="form-control" value="{{ old('project', $maintenance->project) }}" required>
+                <select id="progress_projects_id" name="progress_projects_id" class="form-control" required>
+                    <option value="">-- Pilih Project --</option>
+                </select>
             </div>
 
             <!-- Tanggal Setting -->
             <div class="mb-3">
                 <label>Tanggal Setting</label>
-                <input type="date" name="tanggal_setting" class="form-control" value="{{ old('tanggal_setting', $maintenance->tanggal_setting) }}" required>
+                <input type="date" name="tanggal_setting" class="form-control"
+                    value="{{ old('tanggal_setting', $maintenance->tanggal_setting) }}" required>
             </div>
 
             <!-- Maintenance -->
             <div class="mb-3">
                 <label>Maintenance</label>
-                <input type="text" name="maintenance" class="form-control" value="{{ old('maintenance', $maintenance->maintenance) }}" required>
+                <input type="text" name="maintenance" class="form-control"
+                    value="{{ old('maintenance', $maintenance->maintenance) }}" required>
             </div>
 
             <!-- Dokumentasi -->
@@ -87,8 +91,10 @@
             <div class="mb-3">
                 <label>Status</label>
                 <select name="status" class="form-control" required>
-                    <option value="Waiting List" {{ old('status', $maintenance->status) == 'Waiting List' ? 'selected' : '' }}>Waiting List</option>
-                    <option value="Selesai" {{ old('status', $maintenance->status) == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                    <option value="Waiting List"
+                        {{ old('status', $maintenance->status) == 'Waiting List' ? 'selected' : '' }}>Waiting List</option>
+                    <option value="Selesai" {{ old('status', $maintenance->status) == 'Selesai' ? 'selected' : '' }}>
+                        Selesai</option>
                 </select>
             </div>
 
@@ -96,18 +102,85 @@
             <button type="submit" class="btn btn-success">Update</button>
         </form>
     </div>
-
+@endsection
+@section('script')
     <script>
-        // Ensure the script runs after DOM content is loaded
+        var project_id = "{{ $maintenance->progress_projects_id }}"
+        $(document).ready(function() {
+            var klien_id = $('#klien_id').val();
+
+            $.ajax({
+                url: "{{ route('get_data_project') }}",
+                type: 'GET',
+                data: {
+                    klien_id: klien_id
+                },
+                beforeSend: function() {
+                    $('#progress_projects_id').empty();
+                    $('#progress_projects_id').append(
+                        '<option value="">-- Loading Data --</option>');
+                },
+                success: function(response) {
+                    $('#progress_projects_id').empty();
+                    $('#progress_projects_id').append(
+                        '<option value="">-- Pilih Project --</option>');
+
+                    $.each(response, function(index, project) {
+                        $('#progress_projects_id').append(
+                            $('<option>', {
+                                value: project.id,
+                                text: project.project
+                            })
+                        );
+                    });
+                    $('#progress_projects_id').val(project_id).change();
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Isi otomatis No Induk dan Alamat berdasarkan pilihan Nama Klien
-            document.getElementById('nama_klien').addEventListener('change', function () {
+            document.getElementById('klien_id').addEventListener('change', function() {
                 const selected = this.options[this.selectedIndex];
                 const noInduk = selected.getAttribute('data-no_induk');
                 const alamat = selected.getAttribute('data-alamat');
 
                 document.getElementById('no_induk').value = noInduk || '';
                 document.getElementById('alamat').value = alamat || '';
+
+                var klien_id = $('#klien_id').val();
+
+                $.ajax({
+                    url: "{{ route('get_data_project') }}",
+                    type: 'GET',
+                    data: {
+                        klien_id: klien_id
+                    },
+                    beforeSend: function() {
+                        $('#progress_projects_id').empty();
+                        $('#progress_projects_id').append(
+                            '<option value="">-- Loading Data --</option>');
+                    },
+                    success: function(response) {
+                        $('#progress_projects_id').empty();
+                        $('#progress_projects_id').append(
+                            '<option value="">-- Pilih Project --</option>');
+
+                        $.each(response, function(index, project) {
+                            $('#progress_projects_id').append(
+                                $('<option>', {
+                                    value: project.id,
+                                    text: project.project
+                                })
+                            );
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                    }
+                });
             });
         });
     </script>

@@ -5,14 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Maintenance;
 use App\Models\Klien;
+use App\Models\ProgressProject;
 use Illuminate\Support\Facades\File;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Laravel\Prompts\Progress;
 
 class MaintenanceController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Maintenance::query();
+        $query = Maintenance::query()->with('project.klien');
 
         // Filter berdasarkan bulan dan tanggal (opsional)
         $bulan = $request->get('bulan');
@@ -33,30 +35,29 @@ class MaintenanceController extends Controller
 
     public function create()
     {
-        $kliens = Klien::all();  // Mengambil semua klien
+        $kliens = ProgressProject::select('klien_id')
+            ->with('klien')
+            ->groupBy('klien_id')
+            ->get();
         return view('maintenances.create', compact('kliens'));
+    }
+
+    public function get_data_project(Request $request)
+    {
+        $data = ProgressProject::where('klien_id', $request->klien_id)->get();
+        return response()->json($data);
     }
 
     public function store(Request $request)
     {
         // Validasi input
         $request->validate([
-            'nama_klien' => 'required|string|max:255',
-            'no_induk' => 'required|string', // Menghilangkan validasi unique untuk no_induk
-            'alamat' => 'required|string',
-            'project' => 'required|string|max:255',
+            'progress_projects_id' => 'required|exists:progress_projects,id',
             'tanggal_setting' => 'required|date',
             'maintenance' => 'required|string',
             'status' => 'required|in:Waiting List,Selesai',
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
         ]);
-
-        // Cek jika no_induk sudah ada di Klien, jika sudah ada beri peringatan
-        $klien = Klien::where('no_induk', $request->no_induk)->first();
-        if ($klien) {
-            // Bila no_induk ada, beri peringatan tapi izinkan proses lanjut
-            session()->flash('warning', 'No Induk sudah terdaftar sebagai klien, tetapi akan tetap diproses');
-        }
 
         // Menyimpan data Maintenance
         $data = $request->except(['dokumentasi']);
@@ -71,14 +72,17 @@ class MaintenanceController extends Controller
         Maintenance::create($data);
 
         return redirect()->route('maintenances.index')
-                         ->with('success', 'Data Maintenance berhasil ditambahkan.');
+            ->with('success', 'Data Maintenance berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
         // Temukan proyek maintenance yang akan diedit
-        $maintenance = Maintenance::findOrFail($id);
-        $kliens = Klien::all();  // Ambil semua klien untuk dropdown
+        $maintenance = Maintenance::with('project.klien')->findOrFail($id);
+        $kliens = ProgressProject::select('klien_id')
+            ->with('klien')
+            ->groupBy('klien_id')
+            ->get();  // Ambil semua klien untuk dropdown
 
         return view('maintenances.edit', compact('maintenance', 'kliens'));
     }
@@ -87,9 +91,7 @@ class MaintenanceController extends Controller
     {
         // Validasi input
         $request->validate([
-            'nama_klien' => 'required|string|max:255',
-            'alamat' => 'required|string',
-            'project' => 'required|string|max:255',
+            'progress_projects_id' => 'required|exists:progress_projects,id',
             'tanggal_setting' => 'required|date',
             'maintenance' => 'required|string',
             'status' => 'required|in:Waiting List,Selesai',
@@ -117,7 +119,7 @@ class MaintenanceController extends Controller
         $maintenance->update($data);
 
         return redirect()->route('maintenances.index')
-                         ->with('success', 'Data Maintenance berhasil diperbarui.');
+            ->with('success', 'Data Maintenance berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -131,12 +133,12 @@ class MaintenanceController extends Controller
         $maintenance->delete();
 
         return redirect()->route('maintenances.index')
-                         ->with('success', 'Data Maintenance berhasil dihapus.');
+            ->with('success', 'Data Maintenance berhasil dihapus.');
     }
 
     public function downloadPdf()
     {
-        $maintenances = Maintenance::all();
+        $maintenances = Maintenance::with('project.klien')->get();
 
         foreach ($maintenances as $maintenance) {
             if ($maintenance->dokumentasi && file_exists(public_path($maintenance->dokumentasi))) {
@@ -151,7 +153,7 @@ class MaintenanceController extends Controller
 
         // Load view
         $pdf = PDF::loadView('maintenances.pdf', compact('maintenances'))
-                  ->setPaper('A4', 'landscape');
+            ->setPaper('A4', 'landscape');
 
         return $pdf->download('maintenances.pdf');
     }
@@ -165,6 +167,6 @@ class MaintenanceController extends Controller
         Maintenance::whereMonth('tanggal_setting', $bulan)->delete();
 
         return redirect()->route('maintenances.index')
-                         ->with('success', 'Semua data bulan ini telah dihapus.');
+            ->with('success', 'Semua data bulan ini telah dihapus.');
     }
 }

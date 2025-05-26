@@ -73,6 +73,7 @@ Route::middleware(['auth', 'role:admin,marketing'])->group(function () {
     Route::put('/maintenances/{maintenance}', [MaintenanceController::class, 'update'])->name('maintenances.update');
     Route::delete('/maintenances/{maintenance}', [MaintenanceController::class, 'destroy'])->name('maintenances.destroy');
     Route::post('maintenances/hapusBulan', [MaintenanceController::class, 'hapusBulan'])->name('maintenances.hapusBulan');
+    Route::get('/get_data_project', [MaintenanceController::class, 'get_data_project'])->name('get_data_project');
 });
 Route::get('/maintenances', [MaintenanceController::class, 'index'])->name('maintenances.index');
 Route::get('/maintenances/download', [MaintenanceController::class, 'downloadPdf'])->name('maintenances.downloadPdf');

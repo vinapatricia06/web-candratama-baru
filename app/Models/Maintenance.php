@@ -11,13 +11,15 @@ class Maintenance extends Model
 
     // Menambahkan properti fillable
     protected $fillable = [
-        'nama_klien',
-        'no_induk',
-        'alamat',
-        'project',
+        'progress_projects_id',
         'tanggal_setting',
         'maintenance',
         'status',
         'dokumentasi'
     ];
+
+    public function project()
+    {
+        return $this->belongsTo(ProgressProject::class, 'progress_projects_id', 'id');
+    }
 }
