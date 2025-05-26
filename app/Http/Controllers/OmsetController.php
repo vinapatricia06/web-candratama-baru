@@ -7,6 +7,7 @@ use App\Models\Klien;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OmsetExport;
+use App\Models\ProgressProject;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class OmsetController extends Controller
@@ -18,12 +19,13 @@ class OmsetController extends Controller
         $bulan = $request->get('bulan');
         $tahun = $request->get('tahun'); // Ambil nilai tahun dari parameter request
 
-        $query = Omset::query();
+        $query = Omset::query()->with('project.klien');
 
         // Filter berdasarkan search (nama klien)
         if ($search) {
             $query->where('nama_klien', 'like', '%' . $search . '%');
         }
+
 
         if ($request->has('no_induk') && $request->get('no_induk') != '') {
             $query->where('no_induk', 'like', '%' . $request->get('no_induk') . '%');
@@ -49,89 +51,70 @@ class OmsetController extends Controller
     public function create()
     {
         // Mengambil data klien untuk ditampilkan di dropdown
-        $kliens = Klien::all();
+        $kliens = ProgressProject::select('klien_id')
+            ->with('klien')
+            ->groupBy('klien_id')
+            ->get();
         return view('omsets.create', compact('kliens'));
     }
 
     // Menyimpan data omset baru
     public function store(Request $request)
-{
-    // Validasi input
-    $request->validate([
-        'tanggal' => 'required|date',
-        'klien_id' => 'required|exists:kliens,id',  // Validasi klien_id
-        'alamat' => 'required|string',
-        'project' => 'required|string|max:255',
-        'sumber_lead' => 'required|string|max:255',
-        'nominal' => 'required|numeric',  // Validasi nominal
-    ]);
+    {
+        // Validasi input
+        $request->validate([
+            'tanggal' => 'required|date',
+            'progress_projects_id' => 'required|exists:progress_projects,id',
+            'sumber_lead' => 'required|string|max:255',
+            'nominal' => 'required|numeric',  // Validasi nominal
+        ]);
 
-    // Ambil data nama klien dan no_induk berdasarkan klien_id
-    $klien = Klien::find($request->klien_id);
+        // Menyimpan data omset jika tidak ada duplikasi
+        Omset::create([
+            'tanggal' => $request->tanggal,
+            'progress_projects_id' => $request->progress_projects_id,  // Menyimpan ID project
+            'sumber_lead' => $request->sumber_lead,
+            'nominal' => $request->nominal,
+        ]);
 
-    // Cek apakah no_induk sudah ada dalam tabel omsets
-    // $existingOmset = Omset::where('no_induk', $klien->no_induk)->first();
-
-    // if ($existingOmset) {
-    //     return redirect()->back()->withErrors(['no_induk' => 'No Induk ' . $klien->no_induk . ' sudah ada. Silakan pilih klien lain.']);
-    // }
-
-    // Menyimpan data omset jika tidak ada duplikasi
-    Omset::create([
-        'tanggal' => $request->tanggal,
-        'klien_id' => $request->klien_id,  // Menyimpan ID klien
-        'no_induk' => $klien->no_induk,  // Mengambil no_induk klien
-        'nama_klien' => $klien->nama_klien,  // Menambahkan nama klien secara otomatis
-        'alamat' => $request->alamat,
-        'project' => $request->project,
-        'sumber_lead' => $request->sumber_lead,
-        'nominal' => $request->nominal,
-    ]);
-
-    return redirect()->route('omsets.index')->with('success', 'Data omset berhasil ditambahkan!');
-}
+        return redirect()->route('omsets.index')->with('success', 'Data omset berhasil ditambahkan!');
+    }
 
     // Menampilkan form untuk mengedit omset
     public function edit($id)
     {
-        $omset = Omset::findOrFail($id);
-        $kliens = Klien::all();  // Ambil semua klien untuk dropdown
+        $omset = Omset::with('project.klien')->findOrFail($id);
+        $kliens = ProgressProject::select('klien_id')
+            ->with('klien')
+            ->groupBy('klien_id')
+            ->get(); // Ambil semua klien untuk dropdown
         return view('omsets.edit', compact('omset', 'kliens'));
     }
-    
+
     // Memperbarui data omset
     public function update(Request $request, Omset $omset)
     {
         // Validasi input dengan mengubah klien_id menjadi opsional
         $request->validate([
             'tanggal' => 'required|date',
-            'klien_id' => 'nullable|exists:kliens,id',  // Klien opsional, hanya valid jika dipilih
-            'alamat' => 'required|string',
-            'project' => 'required|string|max:255',
+            'progress_projects_id' => 'required|exists:progress_projects,id',
             'sumber_lead' => 'required|string|max:255',
             'nominal' => 'required|numeric',  // Validasi nominal
         ]);
-    
+
         // Ambil data nama klien dan no_induk berdasarkan klien_id jika dipilih
-        if ($request->klien_id) {
-            $klien = Klien::find($request->klien_id);
-            $omset->klien_id = $klien->id;
-            $omset->no_induk = $klien->no_induk;
-            $omset->nama_klien = $klien->nama_klien;
-            $omset->alamat = $klien->alamat;
-        }
-    
+
         // Memperbarui data omset lainnya
         $omset->update([
             'tanggal' => $request->tanggal,
-            'project' => $request->project,
+            'progress_projects_id' => $request->progress_projects_id,
             'sumber_lead' => $request->sumber_lead,
             'nominal' => $request->nominal,
         ]);
-    
+
         return redirect()->route('omsets.index')->with('success', 'Data omset berhasil diperbarui!');
     }
-    
+
     // Menghapus data omset
     public function destroy(Omset $omset)
     {
@@ -187,7 +170,7 @@ class OmsetController extends Controller
         $bulan = $request->get('bulan');
         $tahun = $request->get('tahun');
 
-        $query = Omset::query();
+        $query = Omset::query()->with('project.klien');
 
         if ($search) {
             $query->where('nama_klien', 'like', '%' . $search . '%');

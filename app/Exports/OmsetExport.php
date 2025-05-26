@@ -41,9 +41,9 @@ class OmsetExport implements FromCollection, WithHeadings, WithMapping
         return [
             $no++, // Menambahkan nomor urut
             $omset->tanggal,
-            $omset->nama_klien,
-            $omset->alamat,
-            $omset->project,
+            $omset->project->klien->nama_klien,
+            $omset->project->klien->alamat,
+            $omset->project->project,
             $omset->sumber_lead,
             'Rp ' . number_format($omset->nominal, 2, ',', '.') // Format nominal dengan mata uang
         ];

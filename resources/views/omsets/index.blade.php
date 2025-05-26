@@ -37,11 +37,11 @@
                 </div>
                 <!-- "Cari" Button with Icon -->
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-search"></i> 
+                    <i class="fas fa-search"></i>
                 </button>
                 <!-- "Reset" Button with Icon -->
                 <a href="{{ route('omsets.index') }}" class="btn btn-secondary">
-                    <i class="fas fa-sync"></i> 
+                    <i class="fas fa-sync"></i>
                 </a>
             </div>
         </form>
@@ -72,10 +72,10 @@
                         <tr>
                             <td style="font-size: 18px;">{{ $loop->iteration }}</td> <!-- Menambahkan nomor urut -->
                             <td style="font-size: 18px;">{{ $omset->tanggal }}</td>
-                            <td style="font-size: 18px;">{{ $omset->no_induk }}</td>
-                            <td style="font-size: 18px;">{{ $omset->nama_klien }}</td>
-                            <td style="font-size: 18px;">{{ $omset->alamat }}</td>
-                            <td style="font-size: 18px;">{{ $omset->project }}</td>
+                            <td style="font-size: 18px;">{{ $omset->project->klien->no_induk }}</td>
+                            <td style="font-size: 18px;">{{ $omset->project->klien->nama_klien }}</td>
+                            <td style="font-size: 18px;">{{ $omset->project->klien->alamat }}</td>
+                            <td style="font-size: 18px;">{{ $omset->project->project }}</td>
                             <td style="font-size: 18px;">{{ $omset->sumber_lead }}</td>
                             <td style="font-size: 18px;">Rp {{ number_format($omset->nominal, 2, ',', '.') }}</td>
                             <td>
@@ -96,16 +96,16 @@
 @endsection
 
 @section('script')
-<script>
-    // Trigger the reset button if there's a reset
-    $(document).ready(function() {
-        // If there's any 'Reset' action, it will reset the form
-        $('a[href="{{ route('omsets.index') }}"]').click(function() {
-            $('input[name="search"]').val('');
-            $('input[name="no_induk"]').val('');
-            $('select[name="bulan"]').val('');
-            $('input[name="tahun"]').val('');
+    <script>
+        // Trigger the reset button if there's a reset
+        $(document).ready(function() {
+            // If there's any 'Reset' action, it will reset the form
+            $('a[href="{{ route('omsets.index') }}"]').click(function() {
+                $('input[name="search"]').val('');
+                $('input[name="no_induk"]').val('');
+                $('select[name="bulan"]').val('');
+                $('input[name="tahun"]').val('');
+            });
         });
-    });
-</script>
+    </script>
 @endsection

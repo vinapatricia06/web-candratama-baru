@@ -10,5 +10,10 @@ class Omset extends Model
     use HasFactory;
     protected $table = 'omsets';
     protected $primaryKey = 'id_omset';
-    protected $fillable = ['tanggal','no_induk', 'nama_klien', 'alamat', 'project','sumber_lead', 'nominal'];
+    protected $fillable = ['tanggal', 'progress_projects_id', 'sumber_lead', 'nominal'];
+
+    public function project()
+    {
+        return $this->belongsTo(ProgressProject::class, 'progress_projects_id', 'id');
+    }
 }
