@@ -100,6 +100,7 @@ class ComposerStaticInitc8113ec9a7cc9b0463b24bb7e92f2326
             'Spatie\\ErrorSolutions\\' => 22,
             'Spatie\\Browsershot\\' => 19,
             'Spatie\\Backtrace\\' => 17,
+            'SnapBi\\' => 7,
             'Sabberworm\\CSS\\' => 15,
         ),
         'R' => 
@@ -129,6 +130,7 @@ class ComposerStaticInitc8113ec9a7cc9b0463b24bb7e92f2326
         array (
             'Monolog\\' => 8,
             'Mockery\\' => 8,
+            'Midtrans\\' => 9,
             'Matrix\\' => 7,
             'Masterminds\\' => 12,
             'Maatwebsite\\Excel\\' => 18,
@@ -377,6 +379,10 @@ class ComposerStaticInitc8113ec9a7cc9b0463b24bb7e92f2326
         array (
             0 => __DIR__ . '/..' . '/spatie/backtrace/src',
         ),
+        'SnapBi\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/midtrans/midtrans-php/SnapBi',
+        ),
         'Sabberworm\\CSS\\' => 
         array (
             0 => __DIR__ . '/..' . '/sabberworm/php-css-parser/src',
@@ -445,6 +451,10 @@ class ComposerStaticInitc8113ec9a7cc9b0463b24bb7e92f2326
         'Mockery\\' => 
         array (
             0 => __DIR__ . '/..' . '/mockery/mockery/library/Mockery',
+        ),
+        'Midtrans\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/midtrans/midtrans-php/Midtrans',
         ),
         'Matrix\\' => 
         array (
@@ -4060,6 +4070,14 @@ class ComposerStaticInitc8113ec9a7cc9b0463b24bb7e92f2326
         'Matrix\\Operators\\Multiplication' => __DIR__ . '/..' . '/markbaker/matrix/classes/src/Operators/Multiplication.php',
         'Matrix\\Operators\\Operator' => __DIR__ . '/..' . '/markbaker/matrix/classes/src/Operators/Operator.php',
         'Matrix\\Operators\\Subtraction' => __DIR__ . '/..' . '/markbaker/matrix/classes/src/Operators/Subtraction.php',
+        'Midtrans\\ApiRequestor' => __DIR__ . '/..' . '/midtrans/midtrans-php/Midtrans/ApiRequestor.php',
+        'Midtrans\\Config' => __DIR__ . '/..' . '/midtrans/midtrans-php/Midtrans/Config.php',
+        'Midtrans\\CoreApi' => __DIR__ . '/..' . '/midtrans/midtrans-php/Midtrans/CoreApi.php',
+        'Midtrans\\Notification' => __DIR__ . '/..' . '/midtrans/midtrans-php/Midtrans/Notification.php',
+        'Midtrans\\Sanitizer' => __DIR__ . '/..' . '/midtrans/midtrans-php/Midtrans/Sanitizer.php',
+        'Midtrans\\Snap' => __DIR__ . '/..' . '/midtrans/midtrans-php/Midtrans/Snap.php',
+        'Midtrans\\SnapApiRequestor' => __DIR__ . '/..' . '/midtrans/midtrans-php/Midtrans/SnapApiRequestor.php',
+        'Midtrans\\Transaction' => __DIR__ . '/..' . '/midtrans/midtrans-php/Midtrans/Transaction.php',
         'Mockery\\Adapter\\Phpunit\\MockeryPHPUnitIntegration' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery/Adapter/Phpunit/MockeryPHPUnitIntegration.php',
         'Mockery\\Adapter\\Phpunit\\MockeryPHPUnitIntegrationAssertPostConditions' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery/Adapter/Phpunit/MockeryPHPUnitIntegrationAssertPostConditions.php',
         'Mockery\\Adapter\\Phpunit\\MockeryTestCase' => __DIR__ . '/..' . '/mockery/mockery/library/Mockery/Adapter/Phpunit/MockeryTestCase.php',
@@ -6728,6 +6746,9 @@ class ComposerStaticInitc8113ec9a7cc9b0463b24bb7e92f2326
         'SebastianBergmann\\Type\\UnknownType' => __DIR__ . '/..' . '/sebastian/type/src/type/UnknownType.php',
         'SebastianBergmann\\Type\\VoidType' => __DIR__ . '/..' . '/sebastian/type/src/type/VoidType.php',
         'SebastianBergmann\\Version' => __DIR__ . '/..' . '/sebastian/version/src/Version.php',
+        'SnapBi\\SnapBi' => __DIR__ . '/..' . '/midtrans/midtrans-php/SnapBi/SnapBi.php',
+        'SnapBi\\SnapBiApiRequestor' => __DIR__ . '/..' . '/midtrans/midtrans-php/SnapBi/SnapBiApiRequestor.php',
+        'SnapBi\\SnapBiConfig' => __DIR__ . '/..' . '/midtrans/midtrans-php/SnapBi/SnapBiConfig.php',
         'Spatie\\Backtrace\\Arguments\\ArgumentReducers' => __DIR__ . '/..' . '/spatie/backtrace/src/Arguments/ArgumentReducers.php',
         'Spatie\\Backtrace\\Arguments\\ProvidedArgument' => __DIR__ . '/..' . '/spatie/backtrace/src/Arguments/ProvidedArgument.php',
         'Spatie\\Backtrace\\Arguments\\ReduceArgumentPayloadAction' => __DIR__ . '/..' . '/spatie/backtrace/src/Arguments/ReduceArgumentPayloadAction.php',
