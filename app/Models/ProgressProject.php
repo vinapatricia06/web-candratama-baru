@@ -16,6 +16,8 @@ class ProgressProject extends Model
         'tanggal_setting',
         'dokumentasi',
         'nominal',
+        'kode_transaksi',
+        'snap_token',
         'status_pembayaran',
         'status',
         'serah_terima' // Tambahkan serah_terima di sini

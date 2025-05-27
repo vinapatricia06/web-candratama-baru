@@ -67,6 +67,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('progress_projects/hapusBulan', [ProgressProjectController::class, 'hapusBulan'])->name('progress_projects.hapusBulan');
     Route::post('progress_projects/payment', [ProgressProjectController::class, 'payment'])->name('progress_projects.payment');
     Route::post('/create-transaction', [MidtransController::class, 'createTransaction'])->name('createTransaction');
+    Route::get('/sukses/{id}/{sumber}', [MidtransController::class, 'sukses'])->name('sukses');
+    Route::get('/gagal/{id}/{sumber}', [MidtransController::class, 'gagal'])->name('gagal');
 });
 Route::get('/progress_projects', [ProgressProjectController::class, 'index'])->name('progress_projects.index');
 Route::get('/progress-projects/download', [ProgressProjectController::class, 'downloadPdf'])->name('progress_projects.downloadPdf');

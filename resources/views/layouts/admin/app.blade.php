@@ -32,7 +32,7 @@
     <!-- Daterange picker -->
     <link rel="stylesheet" href="{{ asset('plugins/daterangepicker/daterangepicker.css') }}">
     <!-- summernote -->
-    <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}">
+    {{-- <link rel="stylesheet" href="{{ asset('plugins/summernote/summernote-bs4.min.css') }}"> --}}
     <script src="https://kit.fontawesome.com/2a99f4df77.js" crossorigin="anonymous"></script>
 
     @yield('style')
@@ -113,7 +113,7 @@
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper mt-5 pt-3"
-            style="background-image: url('{{ asset('img/bg.jpg') }}'); background-size: 165%; background-repeat: no-repeat; background-position: right;">
+            style="background-image: url(''); background-size: 165%; background-repeat: no-repeat; background-position: right;">
             <!-- Content Header (Page header) -->
             <div class="content-header">
                 <div class="container-fluid">
@@ -173,9 +173,9 @@
     <script src="{{ asset('plugins/moment/moment.min.js') }}"></script>
     <script src="{{ asset('plugins/daterangepicker/daterangepicker.js') }}"></script>
     <!-- SweetAlert2 -->
-    <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+    {{-- <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script> --}}
     <!-- Summernote -->
-    <script src="{{ asset('plugins/summernote/summernote-bs4.min.js') }}"></script>
+    {{-- <script src="{{ asset('plugins/summernote/summernote-bs4.min.js') }}"></script> --}}
     <!-- overlayScrollbars -->
     <script src="{{ asset('plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
     <!-- AdminLTE App -->

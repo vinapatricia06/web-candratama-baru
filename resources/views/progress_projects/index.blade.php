@@ -200,7 +200,7 @@
 @endsection
 
 @section('script')
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-XlYKYpWQKtLrtPtA"></script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-3exfNPbeb-yYb9s7"></script>
 
     <script>
         $(document).ready(function() {
@@ -267,27 +267,28 @@
             snap.pay(snapToken, {
                 onSuccess: function(result) {
                     Notiflix.Notify.success('Pembayaran Berhasil');
-                    const finishRedirectUrl = '/belanja/sukses';
+                    const finishRedirectUrl = '/sukses';
                     const orderId = result.order_id;
-                    // window.location.href = `${finishRedirectUrl}/${orderId}`;
+                    console.log('Order ID:', orderId);
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
                 },
                 onPending: function(result) {
                     Notiflix.Notify.warning('Pembayaran Pending!');
-                    const finishRedirectUrl = '/belanja/gagal';
+                    const finishRedirectUrl = '/gagal';
                     const orderId = result.order_id;
-                    // window.location.href = `${finishRedirectUrl}/${orderId}`;
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
                 },
                 onError: function(result) {
                     Notiflix.Notify.failure('Terjadi kesalahan pada pembayaran!');
-                    const finishRedirectUrl = '/belanja/gagal';
+                    const finishRedirectUrl = '/gagal';
                     const orderId = result.order_id;
-                    // window.location.href = `${finishRedirectUrl}/${orderId}`;
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
                 },
                 onClose: function() {
                     Notiflix.Notify.failure('Pembayaran Ditunda!');
-                    const finishRedirectUrl = '/belanja/gagal';
+                    const finishRedirectUrl = '/gagal';
                     const orderId = order_id;
-                    // window.location.href = `${finishRedirectUrl}/${orderId}`;
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
                 }
             });
         }

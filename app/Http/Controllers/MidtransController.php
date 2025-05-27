@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Omset;
 use App\Models\ProgressProject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -111,5 +112,23 @@ class MidtransController extends Controller
         return response()->json([
             'message' => 'Callback processed successfully'
         ], 200);
+    }
+
+    public function sukses($id, $sumber)
+    {
+        $data = ProgressProject::with('klien')->where('kode_transaksi', $id)->first();
+        Omset::create([
+            'progress_projects_id' => $data->id,
+            'tanggal' => date('Y-m-d'),
+            'sumber_lead' => $sumber,
+            'nominal' => $data->nominal,
+        ]);
+        return view('response.sukses', compact('data'));
+    }
+
+    public function gagal($id, $sumber)
+    {
+        $data = ProgressProject::with('klien')->where('kode_transaksi', $id)->first();
+        return view('response.gagal', compact('data'));
     }
 }
