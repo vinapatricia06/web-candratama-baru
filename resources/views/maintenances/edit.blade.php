@@ -107,6 +107,23 @@
     <script>
         var project_id = "{{ $maintenance->progress_projects_id }}"
         $(document).ready(function() {
+            get_data_project(project_id);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('klien_id').addEventListener('change', function() {
+                const selected = this.options[this.selectedIndex];
+                const noInduk = selected.getAttribute('data-no_induk');
+                const alamat = selected.getAttribute('data-alamat');
+
+                document.getElementById('no_induk').value = noInduk || '';
+                document.getElementById('alamat').value = alamat || '';
+
+                get_data_project();
+            });
+        });
+
+        function get_data_project(selected = null) {
             var klien_id = $('#klien_id').val();
 
             $.ajax({
@@ -133,55 +150,14 @@
                             })
                         );
                     });
-                    $('#progress_projects_id').val(project_id).change();
+                    if (selected !== null) {
+                        $('#progress_projects_id').val(selected).change();
+                    }
                 },
                 error: function(xhr) {
                     console.error(xhr.responseText);
                 }
             });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('klien_id').addEventListener('change', function() {
-                const selected = this.options[this.selectedIndex];
-                const noInduk = selected.getAttribute('data-no_induk');
-                const alamat = selected.getAttribute('data-alamat');
-
-                document.getElementById('no_induk').value = noInduk || '';
-                document.getElementById('alamat').value = alamat || '';
-
-                var klien_id = $('#klien_id').val();
-
-                $.ajax({
-                    url: "{{ route('get_data_project') }}",
-                    type: 'GET',
-                    data: {
-                        klien_id: klien_id
-                    },
-                    beforeSend: function() {
-                        $('#progress_projects_id').empty();
-                        $('#progress_projects_id').append(
-                            '<option value="">-- Loading Data --</option>');
-                    },
-                    success: function(response) {
-                        $('#progress_projects_id').empty();
-                        $('#progress_projects_id').append(
-                            '<option value="">-- Pilih Project --</option>');
-
-                        $.each(response, function(index, project) {
-                            $('#progress_projects_id').append(
-                                $('<option>', {
-                                    value: project.id,
-                                    text: project.project
-                                })
-                            );
-                        });
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseText);
-                    }
-                });
-            });
-        });
+        }
     </script>
 @endsection

@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OmsetExport;
 use App\Models\ProgressProject;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Laravel\Prompts\Progress;
 
 class OmsetController extends Controller
 {
@@ -77,6 +78,10 @@ class OmsetController extends Controller
             'nominal' => $request->nominal,
         ]);
 
+        $kode_transaksi = 'ORDER-' . rand();
+        ProgressProject::where('id', $request->progress_projects_id)
+            ->update(['kode_transaksi' => $kode_transaksi, 'status_pembayaran' => 'Sudah Dibayar']);
+
         return redirect()->route('omsets.index')->with('success', 'Data omset berhasil ditambahkan!');
     }
 
@@ -119,6 +124,8 @@ class OmsetController extends Controller
     public function destroy(Omset $omset)
     {
         $omset->delete();
+        ProgressProject::where('id', $omset->progress_projects_id)
+            ->update(['kode_transaksi' => null, 'status_pembayaran' => 'Menunggu Pembayaran']);
         return redirect()->route('omsets.index')->with('success', 'Data omset berhasil dihapus!');
     }
 
