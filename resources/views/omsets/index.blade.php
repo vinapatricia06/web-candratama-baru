@@ -49,7 +49,12 @@
         <!-- Tombol untuk download Excel -->
         <a href="{{ route('omsets.export') }}" class="btn btn-success mb-3">Download Excel</a>
 
-        <a href="{{ route('omsets.create') }}" class="btn btn-primary mb-3">Tambah Omset</a>
+        @if (
+            (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                auth()->user()->hasRole('finance') ||
+                auth()->user()->hasRole('admin'))
+            <a href="{{ route('omsets.create') }}" class="btn btn-primary mb-3">Tambah Omset</a>
+        @endif
 
         <!-- Tabel untuk menampilkan data omset dengan responsif -->
         <div class="table-responsive" style="overflow-x: auto;">
@@ -79,13 +84,22 @@
                             <td style="font-size: 18px;">{{ $omset->sumber_lead }}</td>
                             <td style="font-size: 18px;">Rp {{ number_format($omset->nominal, 2, ',', '.') }}</td>
                             <td>
-                                <a href="{{ route('omsets.edit', $omset->id_omset) }}" class="btn btn-warning">Edit</a>
-                                <form action="{{ route('omsets.destroy', $omset->id_omset) }}" method="POST"
-                                    class="d-inline">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-danger"
-                                        onclick="return confirm('Yakin hapus? Data pembayaran akan hilang')">Hapus</button>
-                                </form>
+                                @if (
+                                    (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                                        auth()->user()->hasRole('finance') ||
+                                        auth()->user()->hasRole('admin'))
+                                    <a href="{{ route('omsets.edit', $omset->id_omset) }}" class="btn btn-warning">Edit</a>
+                                    <form action="{{ route('omsets.destroy', $omset->id_omset) }}" method="POST"
+                                        class="d-inline">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-danger"
+                                            onclick="return confirm('Yakin hapus? Data pembayaran akan hilang')">Hapus</button>
+                                    </form>
+                                @else
+                                    <button class="btn btn-secondary" disabled>
+                                        <i class="fas fa-lock"></i> Locked
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

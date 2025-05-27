@@ -7,9 +7,14 @@
         <h2>Daftar Maintenance Project</h2>
 
         <!-- Flexbox layout for positioning "Tambah Maintenance" button -->
-        <div class="d-flex justify-content-between mb-3" style="max-width: 650px;">
-            <a href="{{ route('maintenances.create') }}" class="btn btn-primary">Tambah Maintenance</a>
-        </div>
+        @if (
+            (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                auth()->user()->hasRole('marketing') ||
+                auth()->user()->hasRole('admin'))
+            <div class="d-flex justify-content-between mb-3" style="max-width: 650px;">
+                <a href="{{ route('maintenances.create') }}" class="btn btn-primary">Tambah Maintenance</a>
+            </div>
+        @endif
 
         <!-- Form untuk memilih bulan dengan desain yang lebih rapi -->
         <form action="{{ route('maintenances.index') }}" method="GET" class="mb-3 d-flex flex-wrap gap-2"
@@ -99,15 +104,24 @@
                             </td>
                             <td>{{ $maintenance->status }}</td>
                             <td>
-                                <a href="{{ route('maintenances.edit', $maintenance->id) }}"
-                                    class="btn btn-warning">Edit</a>
-                                <form action="{{ route('maintenances.destroy', $maintenance->id) }}" method="POST"
-                                    style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger"
-                                        onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
-                                </form>
+                                @if (
+                                    (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                                        auth()->user()->hasRole('marketing') ||
+                                        auth()->user()->hasRole('admin'))
+                                    <a href="{{ route('maintenances.edit', $maintenance->id) }}"
+                                        class="btn btn-warning">Edit</a>
+                                    <form action="{{ route('maintenances.destroy', $maintenance->id) }}" method="POST"
+                                        style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger"
+                                            onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                                    </form>
+                                @else
+                                    <button class="btn btn-secondary" disabled>
+                                        <i class="fas fa-lock"></i> Locked
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

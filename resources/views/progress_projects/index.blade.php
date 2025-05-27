@@ -14,9 +14,14 @@
         <h2>Daftar Progress Project</h2>
 
         <!-- Flexbox layout untuk penempatan tombol "Tambah Project" -->
-        <div class="d-flex justify-content-between mb-3" style="max-width: 650px;">
-            <a href="{{ route('progress_projects.create') }}" class="btn btn-primary">Tambah Project</a>
-        </div>
+        @if (
+            (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                auth()->user()->hasRole('marketing') ||
+                auth()->user()->hasRole('admin'))
+            <div class="d-flex justify-content-between mb-3" style="max-width: 650px;">
+                <a href="{{ route('progress_projects.create') }}" class="btn btn-primary">Tambah Project</a>
+            </div>
+        @endif
 
         <!-- Form filter yang disederhanakan -->
         <form action="{{ route('progress_projects.index') }}" method="GET" class="mb-4">
@@ -141,28 +146,37 @@
                             <td>{{ $project->status_pembayaran }}</td>
                             <td>{{ $project->serah_terima }}</td>
                             <td>
-                                <div class="btn-group" role="group">
-                                    @if ($project->status_pembayaran == 'Menunggu Pembayaran')
-                                        <button class="btn btn-dark btn-sm" onclick="pembayaran({{ $project->id }})">
-                                            <i class="fas fa-money-bill-wave"></i> Pembayaran
-                                        </button>
-                                    @endif
+                                @if (
+                                    (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                                        auth()->user()->hasRole('marketing') ||
+                                        auth()->user()->hasRole('admin'))
+                                    <div class="btn-group" role="group">
+                                        @if ($project->status_pembayaran == 'Menunggu Pembayaran')
+                                            <button class="btn btn-dark btn-sm" onclick="pembayaran({{ $project->id }})">
+                                                <i class="fas fa-money-bill-wave"></i> Pembayaran
+                                            </button>
+                                        @endif
 
-                                    <a href="{{ route('progress_projects.edit', $project->id) }}"
-                                        class="btn btn-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
+                                        <a href="{{ route('progress_projects.edit', $project->id) }}"
+                                            class="btn btn-warning btn-sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
 
-                                    <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Yakin ingin menghapus?')">
-                                            <i class="fas fa-trash"></i> Hapus
-                                        </button>
-                                    </form>
-                                </div>
+                                        <form action="{{ route('progress_projects.destroy', $project->id) }}"
+                                            method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Yakin ingin menghapus?')">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                @else
+                                    <button class="btn btn-secondary" disabled>
+                                        <i class="fas fa-lock"></i> Locked
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @empty
