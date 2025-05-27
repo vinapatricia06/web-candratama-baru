@@ -14,6 +14,8 @@ use App\Http\Controllers\SuratEkspedisiController;
 use App\Http\Controllers\SuratCleaningController;
 use App\Http\Controllers\SuratInteriorConsultanController;
 use App\Http\Controllers\KlienController;
+use App\Http\Controllers\MidtransController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -24,6 +26,8 @@ use App\Http\Controllers\KlienController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+Route::post('/midtrans-callback', [MidtransController::class, 'callback'])->name('callback');
 
 Route::get('/', function () {
     return view('auth.login');
@@ -62,6 +66,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/progress_projects/{progressProject}', [ProgressProjectController::class, 'destroy'])->name('progress_projects.destroy');
     Route::post('progress_projects/hapusBulan', [ProgressProjectController::class, 'hapusBulan'])->name('progress_projects.hapusBulan');
     Route::post('progress_projects/payment', [ProgressProjectController::class, 'payment'])->name('progress_projects.payment');
+    Route::post('/create-transaction', [MidtransController::class, 'createTransaction'])->name('createTransaction');
 });
 Route::get('/progress_projects', [ProgressProjectController::class, 'index'])->name('progress_projects.index');
 Route::get('/progress-projects/download', [ProgressProjectController::class, 'downloadPdf'])->name('progress_projects.downloadPdf');

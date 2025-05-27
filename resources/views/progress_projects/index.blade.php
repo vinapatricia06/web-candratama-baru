@@ -3,6 +3,13 @@
 @section('title', 'Kelola Progress Project')
 
 @section('content')
+    <div id="loading-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Memproses Data...</span>
+        </div>
+    </div>
+
     <div class="container-fluid">
         <h2>Daftar Progress Project</h2>
 
@@ -136,7 +143,7 @@
                             <td>
                                 <div class="btn-group" role="group">
                                     @if ($project->status_pembayaran == 'Menunggu Pembayaran')
-                                        <button class="btn btn-dark btn-sm" onclick="pembayaran()">
+                                        <button class="btn btn-dark btn-sm" onclick="pembayaran({{ $project->id }})">
                                             <i class="fas fa-money-bill-wave"></i> Pembayaran
                                         </button>
                                     @endif
@@ -190,7 +197,101 @@
         </div>
 
     </div>
+@endsection
 
+@section('script')
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-XlYKYpWQKtLrtPtA"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#loading-overlay').fadeOut();
+        });
+
+        function pembayaran(project_id) {
+            Swal.fire({
+                title: 'Masukkan Sumber Lead',
+                input: 'text',
+                inputLabel: 'Sumber Lead',
+                inputPlaceholder: 'Contoh: Instagram, Website, Referral, dll',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan Pembayaran',
+                cancelButtonText: 'Batal',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Sumber Lead wajib diisi!';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const sumber_lead = result.value;
+
+                    var formData = new FormData();
+                    formData.append('project_id', project_id);
+                    formData.append('sumber_lead', sumber_lead);
+
+                    $.ajax({
+                        url: "{{ route('createTransaction') }}",
+                        type: 'post',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: () => {
+                            $('#loading-overlay').fadeIn();
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: (response) => {
+                            $('#loading-overlay').fadeOut();
+                            if (response.status === 'success') {
+                                payWithMidtrans(response.snap_token, response.project_id, response
+                                    .sumber_lead);
+                            } else {
+                                Notiflix.Notify.failure(response.message || 'Transaksi gagal.');
+                            }
+                        },
+                        error: (xhr) => {
+                            $('#loading-overlay').fadeOut();
+                            let message = 'Terjadi kesalahan saat membuat transaksi.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            Notiflix.Notify.failure(message);
+                        }
+                    });
+                }
+            });
+        }
+
+        function payWithMidtrans(snapToken, order_id, sumber_lead) {
+            snap.pay(snapToken, {
+                onSuccess: function(result) {
+                    Notiflix.Notify.success('Pembayaran Berhasil');
+                    const finishRedirectUrl = '/belanja/sukses';
+                    const orderId = result.order_id;
+                    // window.location.href = `${finishRedirectUrl}/${orderId}`;
+                },
+                onPending: function(result) {
+                    Notiflix.Notify.warning('Pembayaran Pending!');
+                    const finishRedirectUrl = '/belanja/gagal';
+                    const orderId = result.order_id;
+                    // window.location.href = `${finishRedirectUrl}/${orderId}`;
+                },
+                onError: function(result) {
+                    Notiflix.Notify.failure('Terjadi kesalahan pada pembayaran!');
+                    const finishRedirectUrl = '/belanja/gagal';
+                    const orderId = result.order_id;
+                    // window.location.href = `${finishRedirectUrl}/${orderId}`;
+                },
+                onClose: function() {
+                    Notiflix.Notify.failure('Pembayaran Ditunda!');
+                    const finishRedirectUrl = '/belanja/gagal';
+                    const orderId = order_id;
+                    // window.location.href = `${finishRedirectUrl}/${orderId}`;
+                }
+            });
+        }
+    </script>
     <script>
         function showImage(src) {
             document.getElementById('modalImage').src = src;
@@ -220,13 +321,5 @@
             // Buka URL download
             window.location.href = downloadUrl;
         });
-    </script>
-@endsection
-
-@section('script')
-    <script>
-        function pembayaran() {
-            alert('Proses pembayaran sedang dalam pengembangan.');
-        }
     </script>
 @endsection
