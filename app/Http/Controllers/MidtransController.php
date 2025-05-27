@@ -58,7 +58,7 @@ class MidtransController extends Controller
             DB::commit();
             return response()->json([
                 'status' => 'success',
-                'project_id' => $project_id,
+                'project_id' => $kode_transaksi,
                 'sumber_lead' => $sumber_lead,
                 'snap_token' => $snapToken,
             ]);

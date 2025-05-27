@@ -84,7 +84,7 @@
                                     class="d-inline">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-danger"
-                                        onclick="return confirm('Yakin hapus?')">Hapus</button>
+                                        onclick="return confirm('Yakin hapus? Data pembayaran akan hilang')">Hapus</button>
                                 </form>
                             </td>
                         </tr>
