@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\OmsetExport;
 use App\Models\ProgressProject;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Prompts\Progress;
 
 class OmsetController extends Controller
