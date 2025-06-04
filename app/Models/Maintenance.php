@@ -15,11 +15,19 @@ class Maintenance extends Model
         'tanggal_setting',
         'maintenance',
         'status',
-        'dokumentasi'
+        'dokumentasi',
+        'biaya_tambahan',
+        'kode_transaksi',
+        'status_pembayaran'
     ];
 
     public function project()
     {
         return $this->belongsTo(ProgressProject::class, 'progress_projects_id', 'id');
+    }
+
+    public function omset()
+    {
+        return $this->belongsTo(Omset::class, 'progress_projects_id', 'progress_projects_id');
     }
 }

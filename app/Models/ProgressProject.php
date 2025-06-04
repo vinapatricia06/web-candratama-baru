@@ -20,7 +20,6 @@ class ProgressProject extends Model
         'snap_token',
         'status_pembayaran',
         'status',
-        'serah_terima' // Tambahkan serah_terima di sini
     ];
 
     public function teknisi()
@@ -31,5 +30,10 @@ class ProgressProject extends Model
     public function klien()
     {
         return $this->belongsTo(Klien::class, 'klien_id', 'id');
+    }
+
+    public function omset()
+    {
+        return $this->belongsTo(Omset::class, 'id', 'progress_projects_id');
     }
 }

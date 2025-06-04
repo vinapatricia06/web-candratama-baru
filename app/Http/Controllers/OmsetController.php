@@ -25,12 +25,16 @@ class OmsetController extends Controller
 
         // Filter berdasarkan search (nama klien)
         if ($search) {
-            $query->where('nama_klien', 'like', '%' . $search . '%');
+            $query->whereHas('project.klien', function ($q) use ($search) {
+                $q->where('nama_klien', 'like', '%' . $search . '%');
+            });
         }
 
-
+        // Filter berdasarkan no_induk
         if ($request->has('no_induk') && $request->get('no_induk') != '') {
-            $query->where('no_induk', 'like', '%' . $request->get('no_induk') . '%');
+            $query->whereHas('project.klien', function ($q) use ($request) {
+                $q->where('no_induk', 'like', '%' . $request->get('no_induk') . '%');
+            });
         }
 
         // Filter berdasarkan bulan
@@ -69,6 +73,7 @@ class OmsetController extends Controller
             'progress_projects_id' => 'required|exists:progress_projects,id',
             'sumber_lead' => 'required|string|max:255',
             'nominal' => 'required|numeric',  // Validasi nominal
+            'metode_pembayaran' => 'required',
         ]);
 
         // Menyimpan data omset jika tidak ada duplikasi
@@ -77,6 +82,7 @@ class OmsetController extends Controller
             'progress_projects_id' => $request->progress_projects_id,  // Menyimpan ID project
             'sumber_lead' => $request->sumber_lead,
             'nominal' => $request->nominal,
+            'metode_pembayaran' => $request->metode_pembayaran,
         ]);
 
         $kode_transaksi = 'ORDER-' . rand();
@@ -106,6 +112,7 @@ class OmsetController extends Controller
             'progress_projects_id' => 'required|exists:progress_projects,id',
             'sumber_lead' => 'required|string|max:255',
             'nominal' => 'required|numeric',  // Validasi nominal
+            'metode_pembayaran' => 'required'
         ]);
 
         // Ambil data nama klien dan no_induk berdasarkan klien_id jika dipilih
@@ -116,6 +123,7 @@ class OmsetController extends Controller
             'progress_projects_id' => $request->progress_projects_id,
             'sumber_lead' => $request->sumber_lead,
             'nominal' => $request->nominal,
+            'metode_pembayaran' => $request->metode_pembayaran,
         ]);
 
         return redirect()->route('omsets.index')->with('success', 'Data omset berhasil diperbarui!');

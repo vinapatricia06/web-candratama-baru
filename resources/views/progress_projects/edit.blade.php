@@ -82,8 +82,12 @@
             <!-- Status -->
             <div class="mb-3">
                 <label>Status</label>
-                <input type="text" name="status" class="form-control"
-                    value="{{ old('status', $progress_project->status) }}" required>
+                <select name="status" class="form-control" required>
+                    <option value="">-- Pilih Status --</option>
+                    <option value="Waiting List" {{ $progress_project->status == 'Waiting List' ? 'selected' : '' }}>
+                        Waiting List</option>
+                    <option value="Selesai" {{ $progress_project->status == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                </select>
             </div>
 
             <!-- Nominal -->
@@ -91,19 +95,6 @@
                 <label>Nominal</label>
                 <input type="number" name="nominal" class="form-control"
                     value="{{ old('nominal', $progress_project->nominal) }}" required>
-            </div>
-
-            <!-- Serah Terima -->
-            <div class="form-group">
-                <label for="serah_terima">Serah Terima</label>
-                <select name="serah_terima" id="serah_terima" class="form-control">
-                    <option value="selesai"
-                        {{ old('serah_terima', $progress_project->serah_terima ?? '') == 'selesai' ? 'selected' : '' }}>
-                        Selesai</option>
-                    <option value="belum"
-                        {{ old('serah_terima', $progress_project->serah_terima ?? '') == 'belum' ? 'selected' : '' }}>Belum
-                    </option>
-                </select>
             </div>
 
             <a href="{{ route('progress_projects.index') }}" class="btn btn-danger mr-2">Kembali</a>

@@ -69,6 +69,8 @@
                         <th style="font-size: 20px;">Project</th>
                         <th style="font-size: 20px;">Sumber Lead</th>
                         <th style="font-size: 20px;">Nominal</th>
+                        <th style="font-size: 20px;">Metode Pembayaran</th>
+                        <th style="font-size: 20px;">Pembayaran</th>
                         <th style="font-size: 20px;">Aksi</th>
                     </tr>
                 </thead>
@@ -83,6 +85,8 @@
                             <td style="font-size: 18px;">{{ $omset->project->project }}</td>
                             <td style="font-size: 18px;">{{ $omset->sumber_lead }}</td>
                             <td style="font-size: 18px;">Rp {{ number_format($omset->nominal, 2, ',', '.') }}</td>
+                            <td style="font-size: 18px;">{{ $omset->metode_pembayaran }}</td>
+                            <td style="font-size: 18px;">{{ $omset->catatan_pembayaran }}</td>
                             <td>
                                 @if (
                                     (auth()->check() && auth()->user()->hasRole('superadmin')) ||

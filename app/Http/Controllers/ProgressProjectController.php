@@ -66,7 +66,6 @@ class ProgressProjectController extends Controller
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
             'status' => 'required|string|max:255',
             'nominal' => 'required|numeric',
-            'serah_terima' => 'required|in:selesai,belum',
         ]);
 
         // Store the data
@@ -107,7 +106,6 @@ class ProgressProjectController extends Controller
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
             'status' => 'required|string|max:255',
             'nominal' => 'required|numeric',
-            'serah_terima' => 'required|in:selesai,belum',
         ]);
 
         // Find the progress project to update
@@ -222,6 +220,23 @@ class ProgressProjectController extends Controller
             Log::error('Error in downloadPdf method: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan saat membuat PDF: ' . $e->getMessage());
         }
+    }
+
+    public function cetakNota($id)
+    {
+        $data = ProgressProject::with([
+            'omset' => function ($query) {
+                $query->where('catatan_pembayaran', 'PROJECT');
+            },
+            'klien'
+        ])->find($id);
+
+        $kode_transaksi = $data['kode_transaksi'];
+
+        $pdf = PDF::loadView('progress_projects.nota', compact('data'))
+            ->setPaper('A4', 'potrait');
+
+        return $pdf->download("Nota-$kode_transaksi");
     }
 
     public function hapusBulan(Request $request)

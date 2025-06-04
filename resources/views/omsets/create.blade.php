@@ -69,6 +69,22 @@
                 <label for="nominal">Nominal</label>
                 <input type="number" name="nominal" id="nominal" class="form-control" required readonly>
             </div>
+
+            <div class="form-group">
+                <label>Metode Pembayaran</label>
+                <select name="metode_pembayaran" class="form-control" required>
+                    <option value="tunai">Tunai/Cash</option>
+                    <option value="midtrans">Midtrans</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Pembayaran</label>
+                <select name="catatan_pembayaran" class="form-control" required>
+                    <option value="PROJECT">Pembayaran Project</option>
+                    <option value="MAINTENANCE">Pembayaran Biaya Tambahan Maintenance</option>
+                </select>
+            </div>
             <br>
             <a href="{{ route('omsets.index') }}" class="btn btn-danger mr-2">Kembali</a>
             <button type="submit" class="btn btn-primary">Simpan</button>

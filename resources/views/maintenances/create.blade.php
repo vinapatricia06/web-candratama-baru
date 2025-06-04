@@ -58,6 +58,11 @@
             </div>
 
             <div class="mb-3">
+                <label>Biaya Tambahan</label>
+                <input type="text" name="biaya_tambahan" class="form-control">
+            </div>
+
+            <div class="mb-3">
                 <label>Dokumentasi (Opsional: Anda dapat mengunggah gambar dengan ukuran maksimal 1.5 MB.) </label>
                 <input type="file" name="dokumentasi" class="form-control">
             </div>

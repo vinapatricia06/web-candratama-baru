@@ -68,6 +68,9 @@ class MaintenanceController extends Controller
             $file->move(public_path('image'), $filename); // Simpan file di folder "image"
             $data['dokumentasi'] = 'image/' . $filename;
         }
+        if (!empty($request->biaya_tambahan)) {
+            $data['status_pembayaran'] = 'Menunggu Pembayaran';
+        }
 
         Maintenance::create($data);
 
@@ -115,6 +118,10 @@ class MaintenanceController extends Controller
             $data['dokumentasi'] = 'storage/dokumentasi/' . $filename;
         }
 
+        if (!empty($request->biaya_tambahan)) {
+            $data['status_pembayaran'] = 'Menunggu Pembayaran';
+        }
+
         // Update data maintenance
         $maintenance->update($data);
 
@@ -134,6 +141,23 @@ class MaintenanceController extends Controller
 
         return redirect()->route('maintenances.index')
             ->with('success', 'Data Maintenance berhasil dihapus.');
+    }
+
+    public function cetakNota($id)
+    {
+        $data = Maintenance::with([
+            'omset' => function ($query) {
+                $query->where('catatan_pembayaran', 'MAINTENANCE');
+            },
+            'project.klien'
+        ])->find($id);
+
+        $kode_transaksi = $data['kode_transaksi'];
+
+        $pdf = PDF::loadView('maintenances.nota', compact('data'))
+            ->setPaper('A4', 'potrait');
+
+        return $pdf->download("Nota-$kode_transaksi");
     }
 
     public function downloadPdf()

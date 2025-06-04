@@ -58,7 +58,7 @@ Route::middleware(['auth', 'role:marketing,interior_consultan,finance,'])->group
     Route::post('/omset/upload-chart', [OmsetController::class, 'uploadChart'])->name('omset.upload-chart');
 });
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin,marketing,finance'])->group(function () {
     Route::get('/progress_projects/create', [ProgressProjectController::class, 'create'])->name('progress_projects.create');
     Route::post('/progress_projects', [ProgressProjectController::class, 'store'])->name('progress_projects.store');
     Route::get('/progress_projects/{progressProject}/edit', [ProgressProjectController::class, 'edit'])->name('progress_projects.edit');
@@ -66,14 +66,15 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/progress_projects/{progressProject}', [ProgressProjectController::class, 'destroy'])->name('progress_projects.destroy');
     Route::post('progress_projects/hapusBulan', [ProgressProjectController::class, 'hapusBulan'])->name('progress_projects.hapusBulan');
     Route::post('progress_projects/payment', [ProgressProjectController::class, 'payment'])->name('progress_projects.payment');
+    Route::get('/nota/{id}', [ProgressProjectController::class, 'cetakNota'])->name('progress_projects.nota');
     Route::post('/create-transaction', [MidtransController::class, 'createTransaction'])->name('createTransaction');
-    Route::get('/sukses/{id}/{sumber}', [MidtransController::class, 'sukses'])->name('sukses');
+    Route::get('/sukses/{id}/{sumber}/{metode}', [MidtransController::class, 'sukses'])->name('sukses');
     Route::get('/gagal/{id}/{sumber}', [MidtransController::class, 'gagal'])->name('gagal');
 });
 Route::get('/progress_projects', [ProgressProjectController::class, 'index'])->name('progress_projects.index');
 Route::get('/progress-projects/download', [ProgressProjectController::class, 'downloadPdf'])->name('progress_projects.downloadPdf');
 
-Route::middleware(['auth', 'role:admin,marketing'])->group(function () {
+Route::middleware(['auth', 'role:admin,marketing,finance'])->group(function () {
     Route::get('/maintenances/create', [MaintenanceController::class, 'create'])->name('maintenances.create');
     Route::post('/maintenances', [MaintenanceController::class, 'store'])->name('maintenances.store');
     Route::get('/maintenances/{maintenance}/edit', [MaintenanceController::class, 'edit'])->name('maintenances.edit');
@@ -81,6 +82,10 @@ Route::middleware(['auth', 'role:admin,marketing'])->group(function () {
     Route::delete('/maintenances/{maintenance}', [MaintenanceController::class, 'destroy'])->name('maintenances.destroy');
     Route::post('maintenances/hapusBulan', [MaintenanceController::class, 'hapusBulan'])->name('maintenances.hapusBulan');
     Route::get('/get_data_project', [MaintenanceController::class, 'get_data_project'])->name('get_data_project');
+    Route::get('/nota/maintenance/{id}', [MaintenanceController::class, 'cetakNota'])->name('maintenances.nota');
+    Route::post('/create-transaction-maintenance', [MidtransController::class, 'createTransactionMaintenance'])->name('createTransactionMaintenance');
+    Route::get('/suksesMaintenance/{id}/{sumber}/{metode}', [MidtransController::class, 'suksesMaintenance'])->name('suksesMaintenance');
+    Route::get('/gagalMaintenance/{id}/{sumber}', [MidtransController::class, 'gagalMaintenance'])->name('gagalMaintenance');
 });
 Route::get('/maintenances', [MaintenanceController::class, 'index'])->name('maintenances.index');
 Route::get('/maintenances/download', [MaintenanceController::class, 'downloadPdf'])->name('maintenances.downloadPdf');

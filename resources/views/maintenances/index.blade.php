@@ -3,6 +3,13 @@
 @section('title', 'Kelola Maintenance Project')
 
 @section('content')
+    <div id="loading-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Memproses Data...</span>
+        </div>
+    </div>
+
     <div class="container-fluid">
         <h2>Daftar Maintenance Project</h2>
 
@@ -10,6 +17,7 @@
         @if (
             (auth()->check() && auth()->user()->hasRole('superadmin')) ||
                 auth()->user()->hasRole('marketing') ||
+                auth()->user()->hasRole('finance') ||
                 auth()->user()->hasRole('admin'))
             <div class="d-flex justify-content-between mb-3" style="max-width: 650px;">
                 <a href="{{ route('maintenances.create') }}" class="btn btn-primary">Tambah Maintenance</a>
@@ -76,6 +84,7 @@
                         <th>Project</th>
                         <th>Tanggal Setting</th>
                         <th>Maintenance</th>
+                        <th>Biaya Tambahan</th>
                         <th>Dokumentasi</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -92,6 +101,15 @@
                             <td>{{ $maintenance->tanggal_setting }}</td>
                             <td>{{ $maintenance->maintenance ?? 'Tidak Ada' }}</td>
                             <td>
+                                Rp {{ number_format($maintenance->biaya_tambahan, 0, ',', '.') }}
+                                @if ($maintenance->biaya_tambahan != 0)
+                                    <br>
+                                    <small>
+                                        Status: {{ $maintenance->status_pembayaran }}
+                                    </small>
+                                @endif
+                            </td>
+                            <td>
                                 @if ($maintenance->dokumentasi)
                                     <!-- Menambahkan tautan untuk melihat gambar lebih besar -->
                                     <a href="#" data-toggle="modal" data-target="#imageModal"
@@ -107,14 +125,34 @@
                                 @if (
                                     (auth()->check() && auth()->user()->hasRole('superadmin')) ||
                                         auth()->user()->hasRole('marketing') ||
+                                        auth()->user()->hasRole('finance') ||
                                         auth()->user()->hasRole('admin'))
+                                    @if ($maintenance->biaya_tambahan !== 0)
+                                        @if ($maintenance->status_pembayaran == 'Menunggu Pembayaran')
+                                            @if (
+                                                (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                                                    auth()->user()->hasRole('finance') ||
+                                                    auth()->user()->hasRole('admin'))
+                                                <button class="btn btn-dark btn-sm"
+                                                    onclick="pembayaran({{ $maintenance->id }})">
+                                                    <i class="fas fa-money-bill-wave"></i> Pembayaran
+                                                </button>
+                                            @endif
+                                        @elseif($maintenance->status_pembayaran == 'Sudah Dibayar')
+                                            <a href="{{ route('maintenances.nota', $maintenance->id) }}" target="_blank"
+                                                class="btn btn-dark btn-sm">
+                                                <i class="fas fa-print"></i> Cetak Nota
+                                            </a>
+                                        @endif
+                                    @endif
+
                                     <a href="{{ route('maintenances.edit', $maintenance->id) }}"
-                                        class="btn btn-warning">Edit</a>
+                                        class="btn btn-warning btn-sm">Edit</a>
                                     <form action="{{ route('maintenances.destroy', $maintenance->id) }}" method="POST"
                                         style="display:inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger"
+                                        <button type="submit" class="btn btn-danger btn-sm"
                                             onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
                                     </form>
                                 @else
@@ -155,6 +193,128 @@
     <script>
         function showImage(src) {
             document.getElementById('modalImage').src = src;
+        }
+    </script>
+@endsection
+
+@section('script')
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-3exfNPbeb-yYb9s7"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#loading-overlay').fadeOut();
+        });
+
+        function pembayaran(maintenance_id) {
+            Swal.fire({
+                title: 'Masukkan Informasi Pembayaran',
+                html: '<label for="sumberLead">Sumber Lead</label>' +
+                    '<input id="sumberLead" class="swal2-input" placeholder="Contoh: Instagram, Website, Referral, dll">' +
+                    '<label for="metodePembayaran">Metode Pembayaran</label>' +
+                    '<select id="metodePembayaran" class="swal2-select">' +
+                    '<option value="">-- Pilih Metode Pembayaran --</option>' +
+                    '<option value="midtrans">Midtrans</option>' +
+                    '<option value="tunai">Tunai</option>' +
+                    '</select>',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan Pembayaran',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    const sumberLead = document.getElementById('sumberLead').value;
+                    const metode = document.getElementById('metodePembayaran').value;
+
+                    if (!sumberLead || !metode) {
+                        Swal.showValidationMessage('Sumber Lead dan Metode Pembayaran wajib diisi!');
+                        return false;
+                    }
+
+                    return {
+                        sumber_lead: sumberLead,
+                        metode_pembayaran: metode
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const {
+                        sumber_lead,
+                        metode_pembayaran
+                    } = result.value;
+
+                    var formData = new FormData();
+                    formData.append('maintenance_id', maintenance_id);
+                    formData.append('sumber_lead', sumber_lead);
+                    formData.append('metode_pembayaran', metode_pembayaran);
+
+                    $.ajax({
+                        url: "{{ route('createTransactionMaintenance') }}",
+                        type: 'post',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: () => {
+                            $('#loading-overlay').fadeIn();
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: (response) => {
+                            $('#loading-overlay').fadeOut();
+                            if (response.status === 'success') {
+                                if (response.metode == 'midtrans') {
+                                    payWithMidtrans(response.snap_token, response.project_id, response
+                                        .sumber_lead, metode_pembayaran);
+                                } else {
+                                    Notiflix.Notify.success('Pembayaran Berhasil');
+                                    const finishRedirectUrl = '/suksesMaintenance';
+                                    window.location.href =
+                                        `${finishRedirectUrl}/${response.project_id}/${response.sumber_lead}/${metode_pembayaran}`;
+                                }
+                            } else {
+                                Notiflix.Notify.failure(response.message || 'Transaksi gagal.');
+                            }
+                        },
+                        error: (xhr) => {
+                            $('#loading-overlay').fadeOut();
+                            let message = 'Terjadi kesalahan saat membuat transaksi.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            Notiflix.Notify.failure(message);
+                        }
+                    });
+                }
+            });
+        }
+
+        function payWithMidtrans(snapToken, order_id, sumber_lead, metode_pembayaran) {
+            snap.pay(snapToken, {
+                onSuccess: function(result) {
+                    Notiflix.Notify.success('Pembayaran Berhasil');
+                    const finishRedirectUrl = '/suksesMaintenance';
+                    const orderId = result.order_id;
+                    console.log('Order ID:', orderId);
+                    window.location.href =
+                        `${finishRedirectUrl}/${orderId}/${sumber_lead}/${metode_pembayaran}`;
+                },
+                onPending: function(result) {
+                    Notiflix.Notify.warning('Pembayaran Pending!');
+                    const finishRedirectUrl = '/gagalMaintenance';
+                    const orderId = result.order_id;
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
+                },
+                onError: function(result) {
+                    Notiflix.Notify.failure('Terjadi kesalahan pada pembayaran!');
+                    const finishRedirectUrl = '/gagalMaintenance';
+                    const orderId = result.order_id;
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
+                },
+                onClose: function() {
+                    Notiflix.Notify.failure('Pembayaran Ditunda!');
+                    const finishRedirectUrl = '/gagalMaintenance';
+                    const orderId = order_id;
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
+                }
+            });
         }
     </script>
 @endsection

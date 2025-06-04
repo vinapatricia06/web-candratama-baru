@@ -59,20 +59,16 @@
 
             <div class="mb-3">
                 <label>Status</label>
-                <input type="text" name="status" class="form-control" required>
+                <select name="status" class="form-control" required>
+                    <option value="">-- Pilih Status --</option>
+                    <option value="Waiting List">Waiting List</option>
+                    <option value="Selesai">Selesai</option>
+                </select>
             </div>
 
             <div class="mb-3">
                 <label>Nominal</label>
                 <input type="number" name="nominal" class="form-control" required>
-            </div>
-
-            <div class="mb-3">
-                <label>Serah Terima</label>
-                <select name="serah_terima" class="form-control" required>
-                    <option value="belum" selected>Belum</option>
-                    <option value="selesai">Selesai</option>
-                </select>
             </div>
 
             <a href="{{ route('progress_projects.index') }}" class="btn btn-danger mr-2">Kembali</a>

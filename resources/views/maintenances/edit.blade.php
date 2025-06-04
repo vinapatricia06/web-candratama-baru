@@ -74,6 +74,12 @@
                     value="{{ old('maintenance', $maintenance->maintenance) }}" required>
             </div>
 
+            <div class="mb-3">
+                <label>Biaya Tambahan</label>
+                <input type="text" name="biaya_tambahan" class="form-control"
+                    value="{{ old('biaya_tambahan', $maintenance->biaya_tambahan) }}">
+            </div>
+
             <!-- Dokumentasi -->
             <div class="mb-3">
                 <label>Dokumentasi</label>

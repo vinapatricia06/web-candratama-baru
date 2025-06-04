@@ -76,6 +76,25 @@
                     value="{{ old('nominal', intval($omset->nominal)) }}" required readonly>
             </div>
 
+            <div class="mb-3">
+                <label>Metode Pembayaran</label>
+                <select name="metode_pembayaran" class="form-control" required>
+                    <option value="tunai" {{ $omset->metode_pembayaran == 'tunai' ? 'selected' : '' }}>Tunai/Cash</option>
+                    <option value="midtrans" {{ $omset->metode_pembayaran == 'midtrans' ? 'selected' : '' }}>Midtrans
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Pembayaran</label>
+                <select name="catatan_pembayaran" class="form-control" required>
+                    <option value="PROJECT" {{ $omset->catatan_pembayaran == 'PROJECT' ? 'selected' : '' }}>Pembayaran
+                        Project</option>
+                    <option value="MAINTENANCE" {{ $omset->catatan_pembayaran == 'MAINTENANCE' ? 'selected' : '' }}>
+                        Pembayaran Biaya Tambahan Maintenance</option>
+                </select>
+            </div>
+
             <a href="{{ route('omsets.index') }}" class="btn btn-danger mr-2">Kembali</a>
             <button type="submit" class="btn btn-success">Update</button>
         </form>
