@@ -49,12 +49,9 @@
         <!-- Tombol untuk download Excel -->
         <a href="{{ route('omsets.export') }}" class="btn btn-success mb-3">Download Excel</a>
 
-        @if (
-            (auth()->check() && auth()->user()->hasRole('superadmin')) ||
-                auth()->user()->hasRole('finance') ||
-                auth()->user()->hasRole('admin'))
+        {{-- @if ((auth()->check() && auth()->user()->hasRole('superadmin')) || auth()->user()->hasRole('finance') || auth()->user()->hasRole('admin'))
             <a href="{{ route('omsets.create') }}" class="btn btn-primary mb-3">Tambah Omset</a>
-        @endif
+        @endif --}}
 
         <!-- Tabel untuk menampilkan data omset dengan responsif -->
         <div class="table-responsive" style="overflow-x: auto;">
@@ -71,7 +68,7 @@
                         <th style="font-size: 20px;">Nominal</th>
                         <th style="font-size: 20px;">Metode Pembayaran</th>
                         <th style="font-size: 20px;">Pembayaran</th>
-                        <th style="font-size: 20px;">Aksi</th>
+                        {{-- <th style="font-size: 20px;">Aksi</th> --}}
                     </tr>
                 </thead>
                 <tbody>
@@ -87,11 +84,8 @@
                             <td style="font-size: 18px;">Rp {{ number_format($omset->nominal, 2, ',', '.') }}</td>
                             <td style="font-size: 18px;">{{ $omset->metode_pembayaran }}</td>
                             <td style="font-size: 18px;">{{ $omset->catatan_pembayaran }}</td>
-                            <td>
-                                @if (
-                                    (auth()->check() && auth()->user()->hasRole('superadmin')) ||
-                                        auth()->user()->hasRole('finance') ||
-                                        auth()->user()->hasRole('admin'))
+                            {{-- <td>
+                                @if ((auth()->check() && auth()->user()->hasRole('superadmin')) || auth()->user()->hasRole('finance') || auth()->user()->hasRole('admin'))
                                     <a href="{{ route('omsets.edit', $omset->id_omset) }}" class="btn btn-warning">Edit</a>
                                     <form action="{{ route('omsets.destroy', $omset->id_omset) }}" method="POST"
                                         class="d-inline">
@@ -104,7 +98,7 @@
                                         <i class="fas fa-lock"></i> Locked
                                     </button>
                                 @endif
-                            </td>
+                            </td> --}}
                         </tr>
                     @endforeach
                 </tbody>
