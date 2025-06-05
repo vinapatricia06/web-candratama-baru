@@ -49,6 +49,46 @@
             background-color: #f4f4f4;
         }
 
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+        }
+
+        .header p {
+            font-size: 14px;
+        }
+
+        .image-container img {
+            width: 120px;
+            height: auto;
+        }
+
+        .address {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #333;
+        }
+
+        .line-top {
+            border-top: 3px solid black;
+            width: 60%;
+            margin-top: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .line-bottom {
+            border-top: 2px solid black;
+            width: 60%;
+            margin-top: 5px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .no-border td {
             border: none;
             padding: 3px 0;
@@ -73,8 +113,13 @@
 
 <body>
 
-    <h1>CANDRATAMA GRANITES</h1>
-    <h2>NOTA TRANSAKSI</h2>
+    <div class="header">
+        <img src="{{ public_path('images/kops.png') }}" alt="Candratama Granites" width="600">
+        <div class="line-top"></div>
+        <div class="line-bottom"></div>
+        <br>
+        <h2>NOTA TRANSAKSI</h2>
+    </div>
 
     <table class="no-border header-info">
         <tr>

@@ -124,20 +124,14 @@
                             <td>
                                 @if (
                                     (auth()->check() && auth()->user()->hasRole('superadmin')) ||
-                                        auth()->user()->hasRole('marketing') ||
                                         auth()->user()->hasRole('finance') ||
                                         auth()->user()->hasRole('admin'))
                                     @if ($maintenance->biaya_tambahan !== 0)
                                         @if ($maintenance->status_pembayaran == 'Menunggu Pembayaran')
-                                            @if (
-                                                (auth()->check() && auth()->user()->hasRole('superadmin')) ||
-                                                    auth()->user()->hasRole('finance') ||
-                                                    auth()->user()->hasRole('admin'))
-                                                <button class="btn btn-dark btn-sm"
-                                                    onclick="pembayaran({{ $maintenance->id }})">
-                                                    <i class="fas fa-money-bill-wave"></i> Pembayaran
-                                                </button>
-                                            @endif
+                                            <button class="btn btn-dark btn-sm"
+                                                onclick="pembayaran({{ $maintenance->id }})">
+                                                <i class="fas fa-money-bill-wave"></i> Pembayaran
+                                            </button>
                                         @elseif($maintenance->status_pembayaran == 'Sudah Dibayar')
                                             <a href="{{ route('maintenances.nota', $maintenance->id) }}" target="_blank"
                                                 class="btn btn-dark btn-sm">
@@ -145,21 +139,17 @@
                                             </a>
                                         @endif
                                     @endif
-
-                                    <a href="{{ route('maintenances.edit', $maintenance->id) }}"
-                                        class="btn btn-warning btn-sm">Edit</a>
-                                    <form action="{{ route('maintenances.destroy', $maintenance->id) }}" method="POST"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
-                                    </form>
-                                @else
-                                    <button class="btn btn-secondary" disabled>
-                                        <i class="fas fa-lock"></i> Locked
-                                    </button>
                                 @endif
+
+                                <a href="{{ route('maintenances.edit', $maintenance->id) }}"
+                                    class="btn btn-warning btn-sm">Edit</a>
+                                <form action="{{ route('maintenances.destroy', $maintenance->id) }}" method="POST"
+                                    style="display:inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                                </form>
                             </td>
                         </tr>
                     @endforeach

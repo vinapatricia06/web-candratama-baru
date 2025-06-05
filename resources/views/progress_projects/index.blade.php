@@ -145,49 +145,38 @@
                             <td>Rp {{ number_format($project->nominal, 0, ',', '.') }}</td>
                             <td>{{ $project->status_pembayaran }}</td>
                             <td>
-                                @if (
-                                    (auth()->check() && auth()->user()->hasRole('superadmin')) ||
-                                        auth()->user()->hasRole('marketing') ||
-                                        auth()->user()->hasRole('finance') ||
-                                        auth()->user()->hasRole('admin'))
-                                    <div class="btn-group" role="group">
-                                        @if (
-                                            (auth()->check() && auth()->user()->hasRole('superadmin')) ||
-                                                auth()->user()->hasRole('finance') ||
-                                                auth()->user()->hasRole('admin'))
-                                            @if ($project->status_pembayaran == 'Menunggu Pembayaran')
-                                                <button class="btn btn-dark btn-sm"
-                                                    onclick="pembayaran({{ $project->id }})">
-                                                    <i class="fas fa-money-bill-wave"></i> Pembayaran
-                                                </button>
-                                            @elseif($project->status_pembayaran == 'Sudah Dibayar')
-                                                <a href="{{ route('progress_projects.nota', $project->id) }}"
-                                                    target="_blank" class="btn btn-dark btn-sm">
-                                                    <i class="fas fa-print"></i> Cetak Nota
-                                                </a>
-                                            @endif
-                                        @endif
-
-                                        <a href="{{ route('progress_projects.edit', $project->id) }}"
-                                            class="btn btn-warning btn-sm">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </a>
-
-                                        <form action="{{ route('progress_projects.destroy', $project->id) }}"
-                                            method="POST" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm"
-                                                onclick="return confirm('Yakin ingin menghapus?')">
-                                                <i class="fas fa-trash"></i> Hapus
+                                <div class="btn-group" role="group">
+                                    @if (
+                                        (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                                            auth()->user()->hasRole('finance') ||
+                                            auth()->user()->hasRole('admin'))
+                                        @if ($project->status_pembayaran == 'Menunggu Pembayaran')
+                                            <button class="btn btn-dark btn-sm" onclick="pembayaran({{ $project->id }})">
+                                                <i class="fas fa-money-bill-wave"></i> Pembayaran
                                             </button>
-                                        </form>
-                                    </div>
-                                @else
-                                    <button class="btn btn-secondary" disabled>
-                                        <i class="fas fa-lock"></i> Locked
-                                    </button>
-                                @endif
+                                        @elseif($project->status_pembayaran == 'Sudah Dibayar')
+                                            <a href="{{ route('progress_projects.nota', $project->id) }}" target="_blank"
+                                                class="btn btn-dark btn-sm">
+                                                <i class="fas fa-print"></i> Cetak Nota
+                                            </a>
+                                        @endif
+                                    @endif
+
+                                    <a href="{{ route('progress_projects.edit', $project->id) }}"
+                                        class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+
+                                    <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST"
+                                        style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Yakin ingin menghapus?')">
+                                            <i class="fas fa-trash"></i> Hapus
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

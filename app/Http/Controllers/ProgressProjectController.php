@@ -236,7 +236,7 @@ class ProgressProjectController extends Controller
         $pdf = PDF::loadView('progress_projects.nota', compact('data'))
             ->setPaper('A4', 'potrait');
 
-        return $pdf->download("Nota-$kode_transaksi");
+        return $pdf->download("Nota-$kode_transaksi.pdf");
     }
 
     public function hapusBulan(Request $request)

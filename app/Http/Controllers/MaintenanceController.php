@@ -157,7 +157,7 @@ class MaintenanceController extends Controller
         $pdf = PDF::loadView('maintenances.nota', compact('data'))
             ->setPaper('A4', 'potrait');
 
-        return $pdf->download("Nota-$kode_transaksi");
+        return $pdf->download("Nota-$kode_transaksi.pdf");
     }
 
     public function downloadPdf()
