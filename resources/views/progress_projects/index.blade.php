@@ -17,7 +17,6 @@
         @if (
             (auth()->check() && auth()->user()->hasRole('superadmin')) ||
                 auth()->user()->hasRole('marketing') ||
-                auth()->user()->hasRole('finance') ||
                 auth()->user()->hasRole('admin'))
             <div class="d-flex justify-content-between mb-3" style="max-width: 650px;">
                 <a href="{{ route('progress_projects.create') }}" class="btn btn-primary">Tambah Project</a>
@@ -161,21 +160,25 @@
                                             </a>
                                         @endif
                                     @endif
+                                    @if (
+                                        (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                                            auth()->user()->hasRole('marketing') ||
+                                            auth()->user()->hasRole('admin'))
+                                        <a href="{{ route('progress_projects.edit', $project->id) }}"
+                                            class="btn btn-warning btn-sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
 
-                                    <a href="{{ route('progress_projects.edit', $project->id) }}"
-                                        class="btn btn-warning btn-sm">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-
-                                    <form action="{{ route('progress_projects.destroy', $project->id) }}" method="POST"
-                                        style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm"
-                                            onclick="return confirm('Yakin ingin menghapus?')">
-                                            <i class="fas fa-trash"></i> Hapus
-                                        </button>
-                                    </form>
+                                        <form action="{{ route('progress_projects.destroy', $project->id) }}"
+                                            method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Yakin ingin menghapus?')">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

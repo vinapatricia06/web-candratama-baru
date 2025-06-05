@@ -17,7 +17,6 @@
         @if (
             (auth()->check() && auth()->user()->hasRole('superadmin')) ||
                 auth()->user()->hasRole('marketing') ||
-                auth()->user()->hasRole('finance') ||
                 auth()->user()->hasRole('admin'))
             <div class="d-flex justify-content-between mb-3" style="max-width: 650px;">
                 <a href="{{ route('maintenances.create') }}" class="btn btn-primary">Tambah Maintenance</a>
@@ -140,16 +139,20 @@
                                         @endif
                                     @endif
                                 @endif
-
-                                <a href="{{ route('maintenances.edit', $maintenance->id) }}"
-                                    class="btn btn-warning btn-sm">Edit</a>
-                                <form action="{{ route('maintenances.destroy', $maintenance->id) }}" method="POST"
-                                    style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
-                                </form>
+                                @if (
+                                    (auth()->check() && auth()->user()->hasRole('superadmin')) ||
+                                        auth()->user()->hasRole('marketing') ||
+                                        auth()->user()->hasRole('admin'))
+                                    <a href="{{ route('maintenances.edit', $maintenance->id) }}"
+                                        class="btn btn-warning btn-sm">Edit</a>
+                                    <form action="{{ route('maintenances.destroy', $maintenance->id) }}" method="POST"
+                                        style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
