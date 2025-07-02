@@ -1,6 +1,6 @@
 @extends('layouts.admin.app')
 
-@section('title', 'Kelola Progress Project')
+@section('title', 'Kelola Project')
 
 @section('content')
     <div id="loading-overlay"
@@ -11,7 +11,7 @@
     </div>
 
     <div class="container-fluid">
-        <h2>Daftar Progress Project</h2>
+        <h2>Daftar Project</h2>
 
         <!-- Flexbox layout untuk penempatan tombol "Tambah Project" -->
         @if (

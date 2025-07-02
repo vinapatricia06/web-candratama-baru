@@ -104,7 +104,7 @@
                 <a href="{{ route('progress_projects.index') }}"
                     class="nav-link text-white {{ Request::routeIs('progress_projects.index') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-tasks"></i>
-                    <p>Progress Project</p>
+                    <p>Project</p>
                 </a>
             </li>
 
@@ -311,7 +311,7 @@
                 <a href="{{ route('progress_projects.index') }}"
                     class="nav-link text-white {{ Request::routeIs('progress_projects.index') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-tasks"></i>
-                    <p>Progress Project</p>
+                    <p>Project</p>
                 </a>
             </li>
 

@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="container">
-        <h2>Tambah Progress Project</h2>
+        <h2>Tambah Project</h2>
 
         @if ($errors->has('dokumentasi'))
             <script>
