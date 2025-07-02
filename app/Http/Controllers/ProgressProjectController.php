@@ -26,11 +26,11 @@ class ProgressProjectController extends Controller
 
             // Apply filters
             if ($request->filled('bulan')) {
-                $query->whereMonth('tanggal_setting', $request->bulan);
+                $query->whereMonth('created_at', $request->bulan);
             }
 
             if ($request->filled('tanggal')) {
-                $query->whereDate('tanggal_setting', $request->tanggal);
+                $query->whereDate('created_at', $request->tanggal);
             }
 
             if ($request->filled('teknisi_id')) {
@@ -62,7 +62,8 @@ class ProgressProjectController extends Controller
             'teknisi_id' => 'required|exists:users1,id_user',
             'klien_id' => 'required|exists:kliens,id',
             'project' => 'required|string|max:255',
-            'tanggal_setting' => 'required|date',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date',
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
             'status' => 'required|string|max:255',
             'nominal' => 'required|numeric',
@@ -78,7 +79,6 @@ class ProgressProjectController extends Controller
             $file->move(public_path('image'), $filename);
             $data['dokumentasi'] = 'image/' . $filename;
         }
-
         ProgressProject::create($data);
 
         return redirect()->route('progress_projects.index')
@@ -102,7 +102,8 @@ class ProgressProjectController extends Controller
             'teknisi_id' => 'required|exists:users1,id_user',
             'klien_id' => 'required|exists:kliens,id',
             'project' => 'required|string|max:255',
-            'tanggal_setting' => 'required|date',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date',
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
             'status' => 'required|string|max:255',
             'nominal' => 'required|numeric',
@@ -157,11 +158,11 @@ class ProgressProjectController extends Controller
 
             // Apply filters
             if ($request->filled('bulan')) {
-                $query->whereMonth('tanggal_setting', $request->bulan);
+                $query->whereMonth('created_at', $request->bulan);
             }
 
             if ($request->filled('tanggal')) {
-                $query->whereDate('tanggal_setting', $request->tanggal);
+                $query->whereDate('created_at', $request->tanggal);
             }
 
             if ($request->filled('teknisi_id')) {
@@ -245,7 +246,7 @@ class ProgressProjectController extends Controller
             $bulan = $request->input('bulan');
             Log::info('Deleting all projects for month: ' . $bulan);
 
-            $deleted = ProgressProject::whereMonth('tanggal_setting', $bulan)->delete();
+            $deleted = ProgressProject::whereMonth('created_at', $bulan)->delete();
             Log::info('Deleted ' . $deleted . ' projects');
 
             return redirect()->route('progress_projects.index')

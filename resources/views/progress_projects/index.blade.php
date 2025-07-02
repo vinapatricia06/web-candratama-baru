@@ -46,7 +46,7 @@
 
                         <!-- Filter Tanggal -->
                         <div class="col-md-4 mb-3">
-                            <label for="tanggal">Tanggal Setting:</label>
+                            <label for="tanggal">Tanggal Transaksi:</label>
                             <input type="date" name="tanggal" id="tanggal" class="form-control"
                                 value="{{ request('tanggal') }}">
                         </div>
@@ -113,7 +113,8 @@
                         <th>Klien</th>
                         <th>Alamat</th>
                         <th>Project</th>
-                        <th>Tanggal Setting</th>
+                        <th>Tanggal Mulai</th>
+                        <th>Tanggal Selesai</th>
                         <th>Dokumentasi</th>
                         <th>Status</th>
                         <th>Nominal</th>
@@ -129,7 +130,8 @@
                             <td>{{ $project->klien->nama_klien ?? 'Tidak Ada' }}</td>
                             <td>{{ $project->klien->alamat ?? 'Tidak Ada' }}</td>
                             <td>{{ $project->project }}</td>
-                            <td>{{ $project->tanggal_setting }}</td>
+                            <td>{{ $project->tanggal_mulai }}</td>
+                            <td>{{ $project->tanggal_selesai }}</td>
                             <td>
                                 @if ($project->dokumentasi)
                                     <a href="#" data-toggle="modal" data-target="#imageModal"

@@ -48,8 +48,13 @@
             </div>
 
             <div class="mb-3">
-                <label>Tanggal Setting</label>
-                <input type="date" name="tanggal_setting" class="form-control" required>
+                <label>Tanggal Mulai</label>
+                <input type="date" name="tanggal_mulai" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Tanggal Selesai</label>
+                <input type="date" name="tanggal_selesai" class="form-control" required>
             </div>
 
             <div class="mb-3">
@@ -70,7 +75,9 @@
             <div class="mb-3">
                 <label>Status</label>
                 <select name="status" class="form-control" required>
-                    <option value="Waiting List">Waiting List</option>
+                    <option value="Inisialisasi">Inisialisasi</option>
+                    <option value="Diproses">Diproses</option>
+                    <option value="Dibatalkan">Dibatalkan</option>
                     <option value="Selesai">Selesai</option>
                 </select>
             </div>
@@ -117,6 +124,19 @@
                 },
                 error: function(xhr) {
                     console.error(xhr.responseText);
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tanggalMulai = document.querySelector('input[name="tanggal_mulai"]');
+            const tanggalSelesai = document.querySelector('input[name="tanggal_selesai"]');
+
+            tanggalMulai.addEventListener('change', function() {
+                tanggalSelesai.min = this.value;
+
+                if (tanggalSelesai.value < this.value) {
+                    tanggalSelesai.value = '';
                 }
             });
         });

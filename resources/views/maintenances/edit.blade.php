@@ -60,11 +60,17 @@
                 </select>
             </div>
 
-            <!-- Tanggal Setting -->
+            <!-- Tanggal Mulai -->
             <div class="mb-3">
-                <label>Tanggal Setting</label>
-                <input type="date" name="tanggal_setting" class="form-control"
-                    value="{{ old('tanggal_setting', $maintenance->tanggal_setting) }}" required>
+                <label>Tanggal Mulai</label>
+                <input type="date" name="tanggal_mulai" class="form-control"
+                    value="{{ old('tanggal_mulai', $maintenance->tanggal_mulai) }}" required>
+            </div>
+            <!-- Tanggal Selesai -->
+            <div class="mb-3">
+                <label>Tanggal Selesai</label>
+                <input type="date" name="tanggal_selesai" class="form-control"
+                    value="{{ old('tanggal_selesai', $maintenance->tanggal_selesai) }}" required>
             </div>
 
             <!-- Maintenance -->
@@ -97,8 +103,13 @@
             <div class="mb-3">
                 <label>Status</label>
                 <select name="status" class="form-control" required>
-                    <option value="Waiting List"
-                        {{ old('status', $maintenance->status) == 'Waiting List' ? 'selected' : '' }}>Waiting List</option>
+                    <option value="Inisialisasi"
+                        {{ old('status', $maintenance->status) == 'Inisialisasi' ? 'selected' : '' }}>
+                        Inisialisasi</option>
+                    <option value="Diproses" {{ old('status', $maintenance->status) == 'Diproses' ? 'selected' : '' }}>
+                        Diproses</option>
+                    <option value="Dibatalkan" {{ old('status', $maintenance->status) == 'Dibatalkan' ? 'selected' : '' }}>
+                        Dibatalkan</option>
                     <option value="Selesai" {{ old('status', $maintenance->status) == 'Selesai' ? 'selected' : '' }}>
                         Selesai</option>
                 </select>

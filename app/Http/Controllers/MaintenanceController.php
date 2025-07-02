@@ -21,11 +21,11 @@ class MaintenanceController extends Controller
         $tanggal = $request->get('tanggal');
 
         if ($bulan) {
-            $query->whereMonth('tanggal_setting', $bulan);
+            $query->whereMonth('created_at', $bulan);
         }
 
         if ($tanggal) {
-            $query->whereDay('tanggal_setting', $tanggal);
+            $query->whereDay('created_at', $tanggal);
         }
 
         $maintenances = $query->get();
@@ -53,9 +53,10 @@ class MaintenanceController extends Controller
         // Validasi input
         $request->validate([
             'progress_projects_id' => 'required|exists:progress_projects,id',
-            'tanggal_setting' => 'required|date',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date',
             'maintenance' => 'required|string',
-            'status' => 'required|in:Waiting List,Selesai',
+            'status' => 'required|string',
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
         ]);
 
@@ -95,9 +96,10 @@ class MaintenanceController extends Controller
         // Validasi input
         $request->validate([
             'progress_projects_id' => 'required|exists:progress_projects,id',
-            'tanggal_setting' => 'required|date',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date',
             'maintenance' => 'required|string',
-            'status' => 'required|in:Waiting List,Selesai',
+            'status' => 'required|string',
             'dokumentasi' => 'nullable|image|mimes:jpeg,png,jpg|max:1536',  // 1.5MB = 1536KB
         ]);
 

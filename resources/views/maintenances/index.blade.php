@@ -81,7 +81,8 @@
                         <th>No Induk</th>
                         <th>Alamat</th>
                         <th>Project</th>
-                        <th>Tanggal Setting</th>
+                        <th>Tanggal Mulai</th>
+                        <th>Tanggal Selesai</th>
                         <th>Maintenance</th>
                         <th>Biaya Tambahan</th>
                         <th>Dokumentasi</th>
@@ -97,7 +98,8 @@
                             <td>{{ $maintenance->project->klien->no_induk }}</td>
                             <td>{{ $maintenance->project->klien->alamat }}</td>
                             <td>{{ $maintenance->project->project }}</td>
-                            <td>{{ $maintenance->tanggal_setting }}</td>
+                            <td>{{ $maintenance->tanggal_mulai }}</td>
+                            <td>{{ $maintenance->tanggal_selesai }}</td>
                             <td>{{ $maintenance->maintenance ?? 'Tidak Ada' }}</td>
                             <td>
                                 Rp {{ number_format($maintenance->biaya_tambahan, 0, ',', '.') }}

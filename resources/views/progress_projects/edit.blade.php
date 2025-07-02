@@ -59,11 +59,18 @@
                     value="{{ old('project', $progress_project->project) }}" required>
             </div>
 
-            <!-- Tanggal Setting -->
+            <!-- Tanggal Mulai -->
             <div class="mb-3">
-                <label>Tanggal Setting</label>
-                <input type="date" name="tanggal_setting" class="form-control"
-                    value="{{ old('tanggal_setting', $progress_project->tanggal_setting) }}" required>
+                <label>Tanggal Mulai</label>
+                <input type="date" name="tanggal_mulai" class="form-control"
+                    value="{{ old('tanggal_mulai', $progress_project->tanggal_mulai) }}" required>
+            </div>
+
+            <!-- Tanggal Selesai -->
+            <div class="mb-3">
+                <label>Tanggal Selesai</label>
+                <input type="date" name="tanggal_selesai" class="form-control"
+                    value="{{ old('tanggal_selesai', $progress_project->tanggal_selesai) }}" required>
             </div>
 
             <!-- Dokumentasi -->
@@ -84,9 +91,14 @@
                 <label>Status</label>
                 <select name="status" class="form-control" required>
                     <option value="">-- Pilih Status --</option>
-                    <option value="Waiting List" {{ $progress_project->status == 'Waiting List' ? 'selected' : '' }}>
-                        Waiting List</option>
-                    <option value="Selesai" {{ $progress_project->status == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                    <option value="Inisialisasi" {{ $progress_project->status == 'Inisialisasi' ? 'selected' : '' }}>
+                        Inisialisasi</option>
+                    <option value="Diproses" {{ $progress_project->status == 'Diproses' ? 'selected' : '' }}>Diproses
+                    </option>
+                    <option value="Dibatalkan" {{ $progress_project->status == 'Dibatalkan' ? 'selected' : '' }}>
+                        Dibatalkan
+                    <option value="Selesai" {{ $progress_project->status == 'Selesai' ? 'selected' : '' }}>Selesai
+                    </option>
                 </select>
             </div>
 
@@ -111,6 +123,18 @@
                 const alamat = selected.getAttribute('data-alamat');
 
                 document.getElementById('alamat').value = alamat || '';
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            const tanggalMulai = document.querySelector('input[name="tanggal_mulai"]');
+            const tanggalSelesai = document.querySelector('input[name="tanggal_selesai"]');
+
+            tanggalMulai.addEventListener('change', function() {
+                tanggalSelesai.min = this.value;
+
+                if (tanggalSelesai.value < this.value) {
+                    tanggalSelesai.value = '';
+                }
             });
         });
     </script>

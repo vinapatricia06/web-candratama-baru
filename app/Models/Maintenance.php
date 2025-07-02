@@ -12,7 +12,8 @@ class Maintenance extends Model
     // Menambahkan properti fillable
     protected $fillable = [
         'progress_projects_id',
-        'tanggal_setting',
+        'tanggal_mulai',
+        'tanggal_selesai',
         'maintenance',
         'status',
         'dokumentasi',
