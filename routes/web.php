@@ -67,6 +67,9 @@ Route::middleware(['auth', 'role:admin,marketing,finance'])->group(function () {
     Route::post('progress_projects/hapusBulan', [ProgressProjectController::class, 'hapusBulan'])->name('progress_projects.hapusBulan');
     Route::post('progress_projects/payment', [ProgressProjectController::class, 'payment'])->name('progress_projects.payment');
     Route::get('/nota/{id}', [ProgressProjectController::class, 'cetakNota'])->name('progress_projects.nota');
+    Route::get('/invoice/{id}', [ProgressProjectController::class, 'cetakInvoice'])->name('progress_projects.invoice');
+    Route::get('/invoiceDP/{id}', [ProgressProjectController::class, 'cetakInvoiceDP'])->name('progress_projects.invoiceDP');
+    Route::get('/invoiceDebt/{id}', [ProgressProjectController::class, 'cetakInvoiceDebt'])->name('progress_projects.invoiceDebt');
     Route::get('/detail_pembayaran/{id}', [ProgressProjectController::class, 'detailPembayaran'])->name('progress_projects.detail');
     Route::post('/create-transaction', [MidtransController::class, 'createTransaction'])->name('createTransaction');
     Route::get('/sukses/{id}/{sumber}/{metode}', [MidtransController::class, 'sukses'])->name('sukses');

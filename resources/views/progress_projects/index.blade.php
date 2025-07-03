@@ -173,6 +173,10 @@
                                             <button class="btn btn-dark btn-sm" onclick="pembayaran({{ $project->id }})">
                                                 <i class="fas fa-money-bill-wave"></i> Pembayaran
                                             </button>
+                                            <a href="{{ route('progress_projects.invoice', $project->id) }}"
+                                                target="_blank" class="btn btn-info btn-sm">
+                                                <i class="fas fa-file-invoice"></i> Cetak Invoice
+                                            </a>
                                         @elseif($project->status_pembayaran == 'Sudah Dibayar')
                                             <a href="{{ route('progress_projects.nota', $project->id) }}" target="_blank"
                                                 class="btn btn-dark btn-sm">
@@ -183,9 +187,13 @@
                                                 onclick="pembayaranDP({{ $project->id }})">
                                                 <i class="fas fa-money-bill-wave"></i> Pembayaran Uang Muka
                                             </button>
+                                            <a href="{{ route('progress_projects.invoiceDP', $project->id) }}"
+                                                target="_blank" class="btn btn-info btn-sm">
+                                                <i class="fas fa-file-invoice"></i> Cetak Invoice
+                                            </a>
                                         @else
-                                            <a href="{{ route('progress_projects.detail', $project->id) }}" target="_blank"
-                                                class="btn btn-dark btn-sm">
+                                            <a href="{{ route('progress_projects.detail', $project->id) }}"
+                                                target="_blank" class="btn btn-dark btn-sm">
                                                 <i class="fas fa-info-circle"></i> Detail Pembayaran
                                             </a>
                                         @endif

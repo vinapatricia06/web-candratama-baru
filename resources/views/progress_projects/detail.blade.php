@@ -47,6 +47,10 @@
                                     <button class="btn btn-dark btn-sm" onclick="pembayaran({{ $item->id }})">
                                         <i class="fas fa-money-bill-wave"></i> Pembayaran
                                     </button>
+                                    <a href="{{ route('progress_projects.invoiceDebt', $item->id) }}" target="_blank"
+                                        class="btn btn-info btn-sm">
+                                        <i class="fas fa-file-invoice"></i> Cetak Invoice
+                                    </a>
                                 @elseif($item->status_pembayaran == 'Sudah Dibayar')
                                     <a href="{{ route('progress_projects.nota_hutang', $item->id) }}" target="_blank"
                                         class="btn btn-dark btn-sm">

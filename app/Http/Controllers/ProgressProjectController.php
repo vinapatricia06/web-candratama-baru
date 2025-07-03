@@ -350,6 +350,44 @@ class ProgressProjectController extends Controller
         return $pdf->download("Nota-$kode_transaksi.pdf");
     }
 
+    public function cetakInvoice($id)
+    {
+        $data = ProgressProject::with('klien')->find($id);
+
+        $pdf = PDF::loadView('progress_projects.invoice', compact('data'))
+            ->setPaper('A4', 'potrait');
+
+        return $pdf->download("Invoice-$id.pdf");
+    }
+
+    public function cetakInvoiceDP($id)
+    {
+        $data = ProgressProject::with('klien')->find($id);
+
+        $pdf = PDF::loadView('progress_projects.invoice_dp', compact('data'))
+            ->setPaper('A4', 'potrait');
+
+        return $pdf->download("Invoice-$id.pdf");
+    }
+
+    public function cetakInvoiceDebt($id)
+    {
+        $data = DebtPaymentProject::with('project.klien')->find($id);
+
+        $allPayments = DebtPaymentProject::where('progress_projects_id', $data->progress_projects_id)
+            ->orderBy('tanggal_angsuran')
+            ->get();
+
+        $installmentNumber = $allPayments->search(function ($item) use ($data) {
+            return $item->id === $data->id;
+        }) + 1;
+
+        $pdf = PDF::loadView('progress_projects.invoice_debt', compact('data', 'installmentNumber'))
+            ->setPaper('A4', 'potrait');
+
+        return $pdf->download("Invoice-$id.pdf");
+    }
+
     public function hapusBulan(Request $request)
     {
         try {
