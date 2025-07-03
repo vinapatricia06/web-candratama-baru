@@ -109,11 +109,53 @@
                     value="{{ old('nominal', $progress_project->nominal) }}" required>
             </div>
 
+            <div class="mb-3">
+                <label>Metode Pembayaran</label>
+                <select name="is_hutang" id="metode_pembayaran" class="form-control" required
+                    @if (in_array($progress_project->status_pembayaran, ['Sudah Dibayar', 'Dibayar Sebagian', 'Lunas'])) disabled @endif>
+                    <option value="">-- Pilih Metode --</option>
+                    <option value="0" {{ $progress_project->is_hutang == 0 ? 'selected' : '' }}>Pembayaran Langsung</option>
+                    <option value="1" {{ $progress_project->is_hutang == 1 ? 'selected' : '' }}>Hutang</option>
+                </select>
+            </div>
+
+            <div id="form_angsuran" style="{{ $progress_project->is_hutang == 1 ? '' : 'display: none;' }}">
+                <div class="mb-3">
+                    <label>Uang Muka</label>
+                    <input type="number" name="uang_muka" id="uang_muka" class="form-control" min="1"
+                        placeholder="Masukkan uang muka" value="{{ old('nominal', $progress_project->uang_muka) }}"
+                        @if (in_array($progress_project->status_pembayaran, ['Dibayar Sebagian', 'Lunas'])) disabled @endif>
+                </div>
+
+                <div class="mb-3">
+                    <label>Tanggal Awal Angsuran</label>
+                    <input type="date" name="tanggal_awal_angsuran" id="tanggal_awal_angsuran" class="form-control"
+                        value="{{ optional($progress_project->debtPayments->first())->tanggal_angsuran }}"
+                        @if (in_array($progress_project->status_pembayaran, ['Dibayar Sebagian', 'Lunas'])) disabled @endif>
+                </div>
+
+                <div class="mb-3">
+                    <label>Jumlah Angsuran (Berapa Kali)</label>
+                    <input type="number" name="jumlah_angsuran" id="jumlah_angsuran" class="form-control"
+                        placeholder="Masukkan jumlah angsuran"
+                        value="{{ old('jumlah_angsuran', $progress_project->debtPayments ? $progress_project->debtPayments->count() : '') }}"
+                        @if (in_array($progress_project->status_pembayaran, ['Dibayar Sebagian', 'Lunas'])) disabled @endif>
+                </div>
+
+                <div class="mb-3">
+                    <div class="alert alert-info" id="keterangan_angsuran" style="display: none;">
+                        <h6><strong>Keterangan Angsuran:</strong></h6>
+                        <p id="detail_angsuran"></p>
+                    </div>
+                </div>
+            </div>
+
             <a href="{{ route('progress_projects.index') }}" class="btn btn-danger mr-2">Kembali</a>
-            <button type="submit" class="btn btn-success">Update</button>
+            <button type="submit" class="btn btn-success">Update</button><br><br>
         </form>
     </div>
-
+@endsection
+@section('script')
     <script>
         // Ensure the script runs after DOM content is loaded
         document.addEventListener('DOMContentLoaded', function() {
@@ -136,6 +178,92 @@
                     tanggalSelesai.value = '';
                 }
             });
+
+            const metodePembayaran = document.getElementById('metode_pembayaran');
+            const formAngsuran = document.getElementById('form_angsuran');
+            const tanggalAwalAngsuran = document.getElementById('tanggal_awal_angsuran');
+            const jumlahAngsuran = document.getElementById('jumlah_angsuran');
+            const nominal = document.querySelector('input[name="nominal"]');
+            const uang_muka = document.querySelector('input[name="uang_muka"]');
+            const keteranganAngsuran = document.getElementById('keterangan_angsuran');
+            const detailAngsuran = document.getElementById('detail_angsuran');
+
+            function formatRupiah(angka) {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(angka);
+            }
+
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            function calculateAngsuran() {
+                const nominalValue = parseInt(nominal.value) || 0;
+                const dpValue = parseInt(uang_muka.value) || 0;
+                const totalValue = nominalValue - dpValue;
+                const jumlahAngsuranValue = parseInt(jumlahAngsuran.value) || 0;
+                const tanggalAwal = tanggalAwalAngsuran.value;
+
+                if (dpValue >= nominalValue && nominalValue > 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Uang Muka Tidak Valid',
+                        text: 'Uang muka tidak boleh lebih besar atau sama dengan nominal.',
+                        confirmButtonText: 'OK'
+                    });
+                    uang_muka.value = '';
+                    uang_muka.focus();
+                    keteranganAngsuran.style.display = 'none';
+                    return;
+                }
+
+                if (totalValue > 0 && jumlahAngsuranValue > 0 && tanggalAwal) {
+                    const nominalPerAngsuran = Math.ceil(totalValue / jumlahAngsuranValue);
+
+                    const startDate = new Date(tanggalAwal);
+                    const endDate = new Date(startDate);
+                    endDate.setMonth(endDate.getMonth() + jumlahAngsuranValue - 1);
+
+                    const detailText =
+                        `Pembayaran angsuran sebesar ${formatRupiah(nominalPerAngsuran)} mulai ${formatDate(tanggalAwal)} sampai ${formatDate(endDate.toISOString().split('T')[0])}`;
+
+                    detailAngsuran.textContent = detailText;
+                    keteranganAngsuran.style.display = 'block';
+                } else {
+                    keteranganAngsuran.style.display = 'none';
+                }
+            }
+
+            metodePembayaran.addEventListener('change', function() {
+                if (this.value === '1') {
+                    formAngsuran.style.display = 'block';
+                    tanggalAwalAngsuran.required = true;
+                    jumlahAngsuran.required = true;
+                } else {
+                    formAngsuran.style.display = 'none';
+                    tanggalAwalAngsuran.required = false;
+                    jumlahAngsuran.required = false;
+                    tanggalAwalAngsuran.value = '';
+                    jumlahAngsuran.value = '';
+                    keteranganAngsuran.style.display = 'none';
+                }
+            });
+
+            nominal.addEventListener('input', calculateAngsuran);
+            uang_muka.addEventListener('input', calculateAngsuran);
+            jumlahAngsuran.addEventListener('input', calculateAngsuran);
+            tanggalAwalAngsuran.addEventListener('change', calculateAngsuran);
+            if (metodePembayaran.value === '1') {
+                calculateAngsuran();
+            }
         });
     </script>
 @endsection

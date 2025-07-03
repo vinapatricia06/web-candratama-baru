@@ -101,6 +101,9 @@
             <button id="downloadPdfBtn" class="btn btn-success">
                 <i class="fas fa-file-pdf"></i> Download PDF
             </button>
+            <button id="downloadReport" class="btn btn-info ml-3">
+                <i class="fas fa-file-alt"></i> Laporan Project
+            </button>
         </div>
 
         <!-- Tabel untuk menampilkan progress project dengan responsif -->
@@ -143,8 +146,23 @@
                                 @endif
                             </td>
                             <td>{{ $project->status }}</td>
-                            <td>Rp {{ number_format($project->nominal, 0, ',', '.') }}</td>
-                            <td>{{ $project->status_pembayaran }}</td>
+                            <td>
+                                Rp {{ number_format($project->nominal, 0, ',', '.') }}
+                                @if ($project->uang_muka > 0)
+                                    <br>
+                                    <span class="badge badge-info">Uang Muka: Rp
+                                        {{ number_format($project->uang_muka, 0, ',', '.') }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                {{ $project->status_pembayaran }}
+                                <br>
+                                @if ($project->is_hutang == 1)
+                                    <span class="badge badge-warning">Hutang</span>
+                                @elseif ($project->is_hutang == 0)
+                                    <span class="badge badge-success">Pembayaran Langsung</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="btn-group" role="group">
                                     @if (
@@ -159,6 +177,16 @@
                                             <a href="{{ route('progress_projects.nota', $project->id) }}" target="_blank"
                                                 class="btn btn-dark btn-sm">
                                                 <i class="fas fa-print"></i> Cetak Nota
+                                            </a>
+                                        @elseif($project->status_pembayaran == 'Belum Lunas')
+                                            <button class="btn btn-dark btn-sm"
+                                                onclick="pembayaranDP({{ $project->id }})">
+                                                <i class="fas fa-money-bill-wave"></i> Pembayaran Uang Muka
+                                            </button>
+                                        @else
+                                            <a href="{{ route('progress_projects.detail', $project->id) }}" target="_blank"
+                                                class="btn btn-dark btn-sm">
+                                                <i class="fas fa-info-circle"></i> Detail Pembayaran
                                             </a>
                                         @endif
                                     @endif
@@ -186,7 +214,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="text-center">Tidak ada data yang ditemukan</td>
+                            <td colspan="12" class="text-center">Tidak ada data yang ditemukan</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -337,6 +365,118 @@
                 }
             });
         }
+
+        function pembayaranDP(project_id) {
+            Swal.fire({
+                title: 'Masukkan Informasi Pembayaran',
+                html: '<label for="sumberLead">Sumber Lead</label>' +
+                    '<input id="sumberLead" class="swal2-input" placeholder="Contoh: Instagram, Website, Referral, dll">' +
+                    '<label for="metodePembayaran">Metode Pembayaran</label>' +
+                    '<select id="metodePembayaran" class="swal2-select">' +
+                    '<option value="">-- Pilih Metode Pembayaran --</option>' +
+                    '<option value="midtrans">Midtrans</option>' +
+                    '<option value="tunai">Tunai</option>' +
+                    '</select>',
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan Pembayaran',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    const sumberLead = document.getElementById('sumberLead').value;
+                    const metode = document.getElementById('metodePembayaran').value;
+
+                    if (!sumberLead || !metode) {
+                        Swal.showValidationMessage('Sumber Lead dan Metode Pembayaran wajib diisi!');
+                        return false;
+                    }
+
+                    return {
+                        sumber_lead: sumberLead,
+                        metode_pembayaran: metode
+                    };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const {
+                        sumber_lead,
+                        metode_pembayaran
+                    } = result.value;
+
+                    var formData = new FormData();
+                    formData.append('project_id', project_id);
+                    formData.append('sumber_lead', sumber_lead);
+                    formData.append('metode_pembayaran', metode_pembayaran);
+
+                    $.ajax({
+                        url: "{{ route('createTransactionDP') }}",
+                        type: 'post',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        beforeSend: () => {
+                            $('#loading-overlay').fadeIn();
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: (response) => {
+                            $('#loading-overlay').fadeOut();
+                            if (response.status === 'success') {
+                                if (response.metode == 'midtrans') {
+                                    payWithMidtransDP(response.snap_token, response.order_id, response
+                                        .sumber_lead, metode_pembayaran);
+                                } else {
+                                    Notiflix.Notify.success('Pembayaran Berhasil');
+                                    const finishRedirectUrl = '/sukses_dp';
+                                    window.location.href =
+                                        `${finishRedirectUrl}/${response.order_id}/${response.sumber_lead}/${metode_pembayaran}`;
+                                }
+                            } else {
+                                Notiflix.Notify.failure(response.message || 'Transaksi gagal.');
+                            }
+                        },
+                        error: (xhr) => {
+                            $('#loading-overlay').fadeOut();
+                            let message = 'Terjadi kesalahan saat membuat transaksi.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            }
+                            Notiflix.Notify.failure(message);
+                        }
+                    });
+                }
+            });
+        }
+
+        function payWithMidtransDP(snapToken, order_id, sumber_lead, metode_pembayaran) {
+            snap.pay(snapToken, {
+                onSuccess: function(result) {
+                    Notiflix.Notify.success('Pembayaran Berhasil');
+                    const finishRedirectUrl = '/sukses_dp';
+                    const orderId = result.order_id;
+                    console.log('Order ID:', orderId);
+                    window.location.href =
+                        `${finishRedirectUrl}/${orderId}/${sumber_lead}/${metode_pembayaran}`;
+                },
+                onPending: function(result) {
+                    Notiflix.Notify.warning('Pembayaran Pending!');
+                    const finishRedirectUrl = '/gagal_dp';
+                    const orderId = result.order_id;
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
+                },
+                onError: function(result) {
+                    Notiflix.Notify.failure('Terjadi kesalahan pada pembayaran!');
+                    const finishRedirectUrl = '/gagal_dp';
+                    const orderId = result.order_id;
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
+                },
+                onClose: function() {
+                    Notiflix.Notify.failure('Pembayaran Ditunda!');
+                    const finishRedirectUrl = '/gagal_dp';
+                    const orderId = order_id;
+                    window.location.href = `${finishRedirectUrl}/${orderId}/${sumber_lead}`;
+                }
+            });
+        }
     </script>
     <script>
         function showImage(src) {
@@ -366,6 +506,47 @@
 
             // Buka URL download
             window.location.href = downloadUrl;
+        });
+
+        document.getElementById('downloadReport').addEventListener('click', function() {
+            Swal.fire({
+                title: 'Filter Laporan Project',
+                html: `<div class="form-group text-left">
+                <label>Status Project</label>
+                <select id="status_project" class="form-control">
+                    <option value="0">-- Semua Status --</option>
+                    <option value="Inisialisasi">Inisialisasi</option>
+                    <option value="Diproses">Diproses</option>
+                    <option value="Dibatalkan">Dibatalkan</option>
+                    <option value="Selesai">Selesai</option>
+                </select>
+            </div>
+            <div class="form-group text-left mt-2">
+                <label>Status Pembayaran</label>
+                <select id="status_pembayaran" class="form-control">
+                    <option value="semua">-- Semua Status --</option>
+                    <option value="belum">Belum Dibayar</option>
+                    <option value="sebagian">Dibayar Sebagian</option>
+                    <option value="lunas">Lunas</option>
+                </select>
+            </div>`,
+                showCancelButton: true,
+                confirmButtonText: 'Download',
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    const statusProject = document.getElementById('status_project').value;
+                    const statusPembayaran = document.getElementById('status_pembayaran').value;
+
+                    if (!statusProject || !statusPembayaran) {
+                        Swal.showValidationMessage('Semua field harus diisi!');
+                        return false;
+                    }
+
+                    const url =
+                        `{{ route('progress_projects.downloadReport') }}?status_project=${encodeURIComponent(statusProject)}&status_pembayaran=${encodeURIComponent(statusPembayaran)}`;
+                    window.location.href = url;
+                }
+            });
         });
     </script>
 @endsection

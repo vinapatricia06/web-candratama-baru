@@ -81,54 +81,38 @@
         <thead>
             <tr>
                 <th>No</th>
+                <th>Nama Project</th>
                 <th>Teknisi</th>
                 <th>Klien</th>
-                <th>Alamat</th>
-                <th>Project</th>
                 <th>Tanggal Mulai</th>
                 <th>Tanggal Selesai</th>
-                <th>Dokumentasi</th>
-                <th>Status</th>
-                <th>Nominal</th>
+                <th>Status Project</th>
                 <th>Status Pembayaran</th>
+                <th>Uang Masuk</th>
+                <th>Sisa Pembayaran</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($projects as $key => $project)
+            @forelse ($data as $key => $item)
                 <tr>
                     <td>{{ $key + 1 }}</td>
-                    <td>{{ $project->teknisi->nama ?? 'Tidak Ada' }}</td>
-                    <td>{{ $project->klien->nama_klien ?? 'Tidak Ada' }}</td>
-                    <td>{{ $project->klien->alamat ?? 'Tidak Ada' }}</td>
-                    <td>{{ $project->project }}</td>
-                    <td>{{ $project->tanggal_mulai }}</td>
-                    <td>{{ $project->tanggal_selesai }}</td>
-                    <td>
-                        @if ($project->dokumentasi_base64)
-                            <img src="{{ $project->dokumentasi_base64 }}" alt="Dokumentasi" width="120">
-                        @else
-                            Tidak ada gambar
-                        @endif
-                    </td>
-                    <td>{{ $project->status }}</td>
-                    <td>
-                        Rp {{ number_format($project->nominal, 0, ',', '.') }}
-                        @if ($project->uang_muka > 0)
-                            <br>
-                            (Uang Muka: Rp {{ number_format($project->uang_muka, 0, ',', '.') }})
-                        @endif
-                    </td>
-                    <td>
-                        {{ $project->status_pembayaran }}
-                        <br>
-                        @if ($project->is_hutang == 1)
-                            (Hutang)
-                        @elseif ($project->is_hutang == 0)
-                            (Pembayaran Langsung)
-                        @endif
+                    <td>{{ $item->project }}</td>
+                    <td>{{ $item->teknisi->nama }}</td>
+                    <td>{{ $item->klien->nama_klien }}</td>
+                    <td>{{ $item->tanggal_mulai }}</td>
+                    <td>{{ $item->tanggal_selesai }}</td>
+                    <td>{{ $item->status }}</td>
+                    <td>{{ $item->status_pembayaran }}</td>
+                    <td>Rp {{ number_format(optional($item->omsets)->sum('nominal') ?? 0, 0, ',', '.') }}</td>
+                    <td>Rp
+                        {{ number_format($item->nominal - (optional($item->omsets)->sum('nominal') ?? 0), 0, ',', '.') }}
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="10" style="text-align: center;">Tidak ada data yang ditemukan</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 

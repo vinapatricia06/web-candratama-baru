@@ -67,12 +67,21 @@ Route::middleware(['auth', 'role:admin,marketing,finance'])->group(function () {
     Route::post('progress_projects/hapusBulan', [ProgressProjectController::class, 'hapusBulan'])->name('progress_projects.hapusBulan');
     Route::post('progress_projects/payment', [ProgressProjectController::class, 'payment'])->name('progress_projects.payment');
     Route::get('/nota/{id}', [ProgressProjectController::class, 'cetakNota'])->name('progress_projects.nota');
+    Route::get('/detail_pembayaran/{id}', [ProgressProjectController::class, 'detailPembayaran'])->name('progress_projects.detail');
     Route::post('/create-transaction', [MidtransController::class, 'createTransaction'])->name('createTransaction');
     Route::get('/sukses/{id}/{sumber}/{metode}', [MidtransController::class, 'sukses'])->name('sukses');
     Route::get('/gagal/{id}/{sumber}', [MidtransController::class, 'gagal'])->name('gagal');
+    Route::post('/create-transaction-dp', [MidtransController::class, 'createTransactionDP'])->name('createTransactionDP');
+    Route::get('/sukses_dp/{id}/{sumber}/{metode}', [MidtransController::class, 'suksesDP'])->name('sukses_dp');
+    Route::get('/gagal_dp/{id}/{sumber}', [MidtransController::class, 'gagalDP'])->name('gagal_dp');
+    Route::post('/create-transaction-debt', [MidtransController::class, 'createTransactionDebt'])->name('createTransactionDebt');
+    Route::get('/suksesDebt/{id}/{sumber}/{metode}', [MidtransController::class, 'suksesDebt'])->name('suksesDebt');
+    Route::get('/gagalDebt/{id}/{sumber}', [MidtransController::class, 'gagalDebt'])->name('gagalDebt');
+    Route::get('/nota_hutang/{id}', [ProgressProjectController::class, 'cetakNotaHutang'])->name('progress_projects.nota_hutang');
 });
 Route::get('/progress_projects', [ProgressProjectController::class, 'index'])->name('progress_projects.index');
 Route::get('/progress-projects/download', [ProgressProjectController::class, 'downloadPdf'])->name('progress_projects.downloadPdf');
+Route::get('/progress-projects/download-report', [ProgressProjectController::class, 'downloadReport'])->name('progress_projects.downloadReport');
 
 Route::middleware(['auth', 'role:admin,marketing,finance'])->group(function () {
     Route::get('/maintenances/create', [MaintenanceController::class, 'create'])->name('maintenances.create');

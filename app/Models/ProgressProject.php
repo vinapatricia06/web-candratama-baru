@@ -17,6 +17,8 @@ class ProgressProject extends Model
         'tanggal_selesai',
         'dokumentasi',
         'nominal',
+        'uang_muka',
+        'is_hutang',
         'kode_transaksi',
         'snap_token',
         'status_pembayaran',
@@ -36,5 +38,13 @@ class ProgressProject extends Model
     public function omset()
     {
         return $this->belongsTo(Omset::class, 'id', 'progress_projects_id');
+    }
+    public function omsets()
+    {
+        return $this->HasMany(Omset::class, 'progress_projects_id', 'id');
+    }
+    public function debtPayments()
+    {
+        return $this->hasMany(DebtPaymentProject::class, 'progress_projects_id', 'id');
     }
 }

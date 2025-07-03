@@ -72,7 +72,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($omsets as $omset)
+                    @forelse ($omsets as $omset)
                         <tr>
                             <td style="font-size: 18px;">{{ $loop->iteration }}</td> <!-- Menambahkan nomor urut -->
                             <td style="font-size: 18px;">{{ $omset->tanggal }}</td>
@@ -100,7 +100,11 @@
                                 @endif
                             </td> --}}
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="10" class="text-center">Tidak ada data yang ditemukan</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

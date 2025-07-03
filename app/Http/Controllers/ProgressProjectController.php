@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DebtPaymentProject;
 use Illuminate\Http\Request;
 use App\Models\ProgressProject;
 use App\Models\User1;
 use App\Models\Klien;
+use App\Models\Omset;
 use Illuminate\Support\Facades\File;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use SebastianBergmann\CodeCoverage\Report\Xml\Project;
 
 class ProgressProjectController extends Controller
 {
@@ -69,26 +73,67 @@ class ProgressProjectController extends Controller
             'nominal' => 'required|numeric',
         ]);
 
-        // Store the data
-        $data = $request->except(['dokumentasi']);
+        DB::beginTransaction();
 
-        // Handle file upload for dokumentasi
-        if ($request->hasFile('dokumentasi')) {
-            $file = $request->file('dokumentasi');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('image'), $filename);
-            $data['dokumentasi'] = 'image/' . $filename;
+        try {
+            $data = $request->except(['dokumentasi', 'tanggal_awal_angsuran', 'jumlah_angsuran']);
+
+            if ($request->hasFile('dokumentasi')) {
+                $file = $request->file('dokumentasi');
+                $filename = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('image'), $filename);
+                $data['dokumentasi'] = 'image/' . $filename;
+            }
+
+            if ($request->is_hutang == 1) {
+                $data['status_pembayaran'] = 'Belum Lunas';
+            } else {
+                $data['uang_muka'] = 0;
+            }
+
+            $progressProject = ProgressProject::create($data);
+
+            if ($request->is_hutang == 1) {
+                $tanggal_awal = $request->tanggal_awal_angsuran;
+                $jumlah_angsuran = $request->jumlah_angsuran;
+                $total_nominal = $request->nominal - $request->uang_muka;
+
+                $nominal_per_angsuran = ceil($total_nominal / $jumlah_angsuran);
+
+                for ($i = 0; $i < $jumlah_angsuran; $i++) {
+                    $tanggal_angsuran = date('Y-m-d', strtotime($tanggal_awal . " +{$i} month"));
+
+                    if ($i == ($jumlah_angsuran - 1)) {
+                        $sisa_nominal = $total_nominal - ($nominal_per_angsuran * ($jumlah_angsuran - 1));
+                        $nominal_angsuran = $sisa_nominal;
+                    } else {
+                        $nominal_angsuran = $nominal_per_angsuran;
+                    }
+
+                    DebtPaymentProject::create([
+                        'progress_projects_id' => $progressProject->id,
+                        'tanggal_angsuran' => $tanggal_angsuran,
+                        'nominal' => $nominal_angsuran,
+                    ]);
+                }
+            }
+            DB::commit();
+            return redirect()->route('progress_projects.index')
+                ->with('success', 'Project berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan project: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat menyimpan data.');
         }
-        ProgressProject::create($data);
-
-        return redirect()->route('progress_projects.index')
-            ->with('success', 'Project berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
         // Find the progress project to edit
-        $progress_project = ProgressProject::findOrFail($id);
+        $progress_project = ProgressProject::with('debtPayments')->findOrFail($id);
         $teknisiList = User1::where('role', 'teknisi')->get();
         $kliens = Klien::all(); // Get all clients for the dropdown
 
@@ -111,7 +156,7 @@ class ProgressProjectController extends Controller
 
         // Find the progress project to update
         $progress_project = ProgressProject::findOrFail($id);
-        $data = $request->except(['dokumentasi']);
+        $data = $request->except(['dokumentasi', 'tanggal_awal_angsuran', 'jumlah_angsuran']);
 
         // Handle file upload for dokumentasi
         if ($request->hasFile('dokumentasi')) {
@@ -127,8 +172,48 @@ class ProgressProjectController extends Controller
             $data['dokumentasi'] = 'image/' . $filename;
         }
 
+        if ($request->is_hutang == 1) {
+            $data['status_pembayaran'] = 'Belum Lunas';
+        } else {
+            if ($progress_project->status_pembayaran == 'Belum Lunas') {
+                $data['status_pembayaran'] = 'Menunggu Pembayaran';
+            } else {
+                $data['status_pembayaran'] = $progress_project->status_pembayaran;
+            }
+        }
+
         // Update ProgressProject record
         $progress_project->update($data);
+
+        if ($progress_project->status_pembayaran == 'Belum Lunas') {
+            if (DebtPaymentProject::where('progress_projects_id', $id)->exists()) {
+                DebtPaymentProject::where('progress_projects_id', $id)->delete();
+            }
+            if ($request->is_hutang == 1) {
+                $tanggal_awal = $request->tanggal_awal_angsuran;
+                $jumlah_angsuran = $request->jumlah_angsuran;
+                $total_nominal = $request->nominal - $request->uang_muka;
+
+                $nominal_per_angsuran = ceil($total_nominal / $jumlah_angsuran);
+
+                for ($i = 0; $i < $jumlah_angsuran; $i++) {
+                    $tanggal_angsuran = date('Y-m-d', strtotime($tanggal_awal . " +{$i} month"));
+
+                    if ($i == ($jumlah_angsuran - 1)) {
+                        $sisa_nominal = $total_nominal - ($nominal_per_angsuran * ($jumlah_angsuran - 1));
+                        $nominal_angsuran = $sisa_nominal;
+                    } else {
+                        $nominal_angsuran = $nominal_per_angsuran;
+                    }
+
+                    DebtPaymentProject::create([
+                        'progress_projects_id' => $id,
+                        'tanggal_angsuran' => $tanggal_angsuran,
+                        'nominal' => $nominal_angsuran,
+                    ]);
+                }
+            }
+        }
 
         return redirect()->route('progress_projects.index')
             ->with('success', 'Project berhasil diperbarui.');
@@ -223,6 +308,31 @@ class ProgressProjectController extends Controller
         }
     }
 
+    public function downloadReport(Request $request)
+    {
+        $status_project = $request->status_project;
+        $status_pembayaran = $request->status_pembayaran;
+
+        $data = ProgressProject::with('klien', 'teknisi', 'omsets')
+            ->when($status_project, function ($query, $status_project) {
+                return $query->where('status', $status_project);
+            })
+            ->when($status_pembayaran == "belum", function ($query) {
+                return $query->whereIn('status_pembayaran', ['Menunggu Pembayaran', 'Belum Lunas']);
+            })
+            ->when($status_pembayaran == "sebagian", function ($query) {
+                return $query->where('status_pembayaran', 'Dibayar Sebagian');
+            })
+            ->when($status_pembayaran == "lunas", function ($query) {
+                return $query->where('status_pembayaran', ['Lunas', 'Sudah Dibayar']);
+            })
+            ->get();
+        $pdf = PDF::loadView('progress_projects.pdf_report', compact('data'))
+            ->setPaper('A4', 'landscape');
+
+        return $pdf->download('report_projects.pdf');
+    }
+
     public function cetakNota($id)
     {
         $data = ProgressProject::with([
@@ -255,5 +365,38 @@ class ProgressProjectController extends Controller
             Log::error('Error in hapusBulan method: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
         }
+    }
+
+    public function detailPembayaran($id)
+    {
+        $data = DebtPaymentProject::where('progress_projects_id', $id)->get();
+        return view('progress_projects.detail', compact('data'));
+    }
+
+    public function cetakNotaHutang($id)
+    {
+        $data = DebtPaymentProject::with([
+            'omset' => function ($query) {
+                $query->where('catatan_pembayaran', 'DEBT PROJECT');
+            },
+            'project.klien'
+        ])
+            ->orderBy('tanggal_angsuran')
+            ->find($id);
+
+        $allPayments = DebtPaymentProject::where('progress_projects_id', $data->progress_projects_id)
+            ->orderBy('tanggal_angsuran')
+            ->get();
+
+        $installmentNumber = $allPayments->search(function ($item) use ($data) {
+            return $item->id === $data->id;
+        }) + 1;
+
+        $kode_transaksi = $data['kode_transaksi'];
+
+        $pdf = PDF::loadView('progress_projects.nota_hutang', compact('data', 'installmentNumber'))
+            ->setPaper('A4', 'potrait');
+
+        return $pdf->download("Nota-Angsuran-$kode_transaksi.pdf");
     }
 }

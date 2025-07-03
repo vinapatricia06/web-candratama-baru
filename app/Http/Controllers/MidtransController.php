@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\DebtPaymentProject;
 use App\Models\Maintenance;
 use App\Models\Omset;
 use App\Models\ProgressProject;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Laravel\Prompts\Progress;
@@ -152,6 +154,137 @@ class MidtransController extends Controller
         }
     }
 
+    public function createTransactionDebt(Request $request)
+    {
+        $debt_payment_id = $request->debt_payment_id;
+        $sumber_lead = $request->sumber_lead;
+        $metode_pembayaran = $request->metode_pembayaran;
+        $data_debt_project = DebtPaymentProject::with('project.klien')->findOrFail($debt_payment_id);
+        $kode_transaksi = 'DEBTPROJECT-' . rand();
+
+        DB::beginTransaction();
+        try {
+            if ($metode_pembayaran == "midtrans") {
+                // insert data ke MIDTRANS
+                $transactionDetails = [
+                    'order_id' => $kode_transaksi,
+                    'gross_amount' => $data_debt_project->nominal,
+                ];
+
+                $customerDetails = [
+                    'first_name' => $data_debt_project->project->klien->nama_klien,
+                    'last_name' => '',
+                    'email' => $data_debt_project->project->klien->no_induk . '@gmail.com',
+                    'phone' => $data_debt_project->project->klien->no_hp,
+                ];
+
+                $transaction = [
+                    'transaction_details' => $transactionDetails,
+                    'customer_details' => $customerDetails,
+                ];
+                $snapToken = Snap::getSnapToken($transaction);
+
+                $data_debt_project->kode_transaksi = $kode_transaksi;
+                $data_debt_project->tanggal_pembayaran = Carbon::now();
+                $data_debt_project->snap_token = $snapToken;
+                $data_debt_project->save();
+
+                DB::commit();
+                return response()->json([
+                    'metode' => $metode_pembayaran,
+                    'status' => 'success',
+                    'order_id' => $kode_transaksi,
+                    'sumber_lead' => $sumber_lead,
+                    'snap_token' => $snapToken,
+                ]);
+            } else {
+                $data_debt_project->kode_transaksi = $kode_transaksi;
+                $data_debt_project->tanggal_pembayaran = Carbon::now();
+                $data_debt_project->status_pembayaran = 'Sudah Dibayar';
+                $data_debt_project->save();
+
+                DB::commit();
+                return response()->json([
+                    'metode' => $metode_pembayaran,
+                    'status' => 'success',
+                    'order_id' => $kode_transaksi,
+                    'sumber_lead' => $sumber_lead,
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Transaksi gagal: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function createTransactionDP(Request $request)
+    {
+        $project_id = $request->project_id;
+        $sumber_lead = $request->sumber_lead;
+        $metode_pembayaran = $request->metode_pembayaran;
+        $data_project = ProgressProject::with('klien')->findOrFail($project_id);
+        $kode_transaksi = 'DP-' . rand();
+
+        DB::beginTransaction();
+
+        try {
+            if ($metode_pembayaran == "midtrans") {
+                // insert data ke MIDTRANS
+                $transactionDetails = [
+                    'order_id' => $kode_transaksi,
+                    'gross_amount' => $data_project->uang_muka,
+                ];
+
+                $customerDetails = [
+                    'first_name' => $data_project->klien->nama_klien,
+                    'last_name' => '',
+                    'email' => $data_project->klien->no_induk . '@gmail.com',
+                    'phone' => $data_project->klien->no_hp,
+                ];
+
+                $transaction = [
+                    'transaction_details' => $transactionDetails,
+                    'customer_details' => $customerDetails,
+                ];
+                $snapToken = Snap::getSnapToken($transaction);
+
+                $data_project->kode_transaksi = $kode_transaksi;
+                $data_project->snap_token = $snapToken;
+                $data_project->save();
+
+                DB::commit();
+                return response()->json([
+                    'metode' => $metode_pembayaran,
+                    'status' => 'success',
+                    'order_id' => $kode_transaksi,
+                    'sumber_lead' => $sumber_lead,
+                    'snap_token' => $snapToken,
+                ]);
+            } else {
+                $data_project->kode_transaksi = $kode_transaksi;
+                $data_project->status_pembayaran = 'Dibayar Sebagian';
+                $data_project->save();
+
+                DB::commit();
+                return response()->json([
+                    'metode' => $metode_pembayaran,
+                    'status' => 'success',
+                    'order_id' => $kode_transaksi,
+                    'sumber_lead' => $sumber_lead,
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Transaksi gagal: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function callback(Request $request)
     {
         $serverKey = config('midtrans.server_key');
@@ -164,31 +297,102 @@ class MidtransController extends Controller
                 'received' => $request->signature_key
             ], 403);
         }
-        $data = ProgressProject::where('kode_transaksi', $request->order_id)->first();
-        if ($data == null) {
-            $data = Maintenance::where('kode_transaksi', $request->order_id)->first();
-        }
 
-        switch ($request->transaction_status) {
-            case 'capture':
-            case 'settlement':
-                $data->status_pembayaran = 'Sudah Dibayar';
-                break;
-            case 'pending':
-                $data->status_pembayaran = 'Menunggu Pembayaran';
-                break;
-            case 'deny':
-                $data->status_pembayaran = 'Pembayaran Ditolak';
-                break;
-            case 'expire':
-                $data->status_pembayaran = 'Kadaluarsa';
-                break;
-            case 'cancel':
-                $data->status_pembayaran = 'Dibatalkan';
-                break;
-            default:
-                $data->status_pembayaran = 'Status Tidak Dikenal';
-                break;
+        $data = DebtPaymentProject::where('kode_transaksi', $request->order_id)->first();
+        if ($data == null) {
+            $data = ProgressProject::where('kode_transaksi', $request->order_id)->first();
+            if ($data == null) {
+                $data = Maintenance::where('kode_transaksi', $request->order_id)->first();
+                switch ($request->transaction_status) {
+                    case 'capture':
+                    case 'settlement':
+                        $data->status_pembayaran = 'Sudah Dibayar';
+                        break;
+                    case 'pending':
+                        $data->status_pembayaran = 'Menunggu Pembayaran';
+                        break;
+                    case 'deny':
+                        $data->status_pembayaran = 'Pembayaran Ditolak';
+                        break;
+                    case 'expire':
+                        $data->status_pembayaran = 'Kadaluarsa';
+                        break;
+                    case 'cancel':
+                        $data->status_pembayaran = 'Dibatalkan';
+                        break;
+                    default:
+                        $data->status_pembayaran = 'Status Tidak Dikenal';
+                        break;
+                }
+            } else {
+                if ($data->uang_muka !== 0) {
+                    switch ($request->transaction_status) {
+                        case 'capture':
+                        case 'settlement':
+                            $data->status_pembayaran = 'Dibayar Sebagian';
+                            break;
+                        case 'pending':
+                            $data->status_pembayaran = 'Belum Lunas';
+                            break;
+                        case 'deny':
+                            $data->status_pembayaran = 'Pembayaran Ditolak';
+                            break;
+                        case 'expire':
+                            $data->status_pembayaran = 'Kadaluarsa';
+                            break;
+                        case 'cancel':
+                            $data->status_pembayaran = 'Dibatalkan';
+                            break;
+                        default:
+                            $data->status_pembayaran = 'Status Tidak Dikenal';
+                            break;
+                    }
+                } else {
+                    switch ($request->transaction_status) {
+                        case 'capture':
+                        case 'settlement':
+                            $data->status_pembayaran = 'Sudah Dibayar';
+                            break;
+                        case 'pending':
+                            $data->status_pembayaran = 'Menunggu Pembayaran';
+                            break;
+                        case 'deny':
+                            $data->status_pembayaran = 'Pembayaran Ditolak';
+                            break;
+                        case 'expire':
+                            $data->status_pembayaran = 'Kadaluarsa';
+                            break;
+                        case 'cancel':
+                            $data->status_pembayaran = 'Dibatalkan';
+                            break;
+                        default:
+                            $data->status_pembayaran = 'Status Tidak Dikenal';
+                            break;
+                    }
+                }
+            }
+        } else {
+            switch ($request->transaction_status) {
+                case 'capture':
+                case 'settlement':
+                    $data->status_pembayaran = 'Sudah Dibayar';
+                    break;
+                case 'pending':
+                    $data->status_pembayaran = 'Belum Dibayar';
+                    break;
+                case 'deny':
+                    $data->status_pembayaran = 'Pembayaran Ditolak';
+                    break;
+                case 'expire':
+                    $data->status_pembayaran = 'Kadaluarsa';
+                    break;
+                case 'cancel':
+                    $data->status_pembayaran = 'Dibatalkan';
+                    break;
+                default:
+                    $data->status_pembayaran = 'Status Tidak Dikenal';
+                    break;
+            }
         }
 
         $data->save();
@@ -197,6 +401,7 @@ class MidtransController extends Controller
             'message' => 'Callback processed successfully'
         ], 200);
     }
+
 
     public function sukses($id, $sumber, $metode)
     {
@@ -236,5 +441,64 @@ class MidtransController extends Controller
     {
         $data = Maintenance::with('project.klien')->where('kode_transaksi', $id)->first();
         return view('response.gagal_maintenance', compact('data'));
+    }
+
+    public function suksesDebt($id, $sumber, $metode)
+    {
+        $data = DebtPaymentProject::with('project.klien')->where('kode_transaksi', $id)->first();
+        Omset::create([
+            'progress_projects_id' => $data->project->id,
+            'tanggal' => date('Y-m-d'),
+            'sumber_lead' => $sumber,
+            'nominal' => $data->nominal,
+            'metode_pembayaran' => $metode,
+            'catatan_pembayaran' => 'DEBT PROJECT'
+        ]);
+
+        $progressProjectId = $data->progress_projects_id;
+        $jumlahTotal = DebtPaymentProject::where('progress_projects_id', $progressProjectId)->count();
+        $jumlahSudahDibayar = DebtPaymentProject::where('progress_projects_id', $progressProjectId)
+            ->where('status_pembayaran', 'Sudah Dibayar')
+            ->count();
+
+        if ($jumlahSudahDibayar == $jumlahTotal && $jumlahTotal > 0) {
+            $statusPembayaran = 'Lunas';
+        } elseif ($jumlahSudahDibayar > 0) {
+            $statusPembayaran = 'Dibayar Sebagian';
+        } else {
+            $statusPembayaran = 'Belum Lunas';
+        }
+
+        ProgressProject::where('id', $progressProjectId)->update([
+            'status_pembayaran' => $statusPembayaran
+        ]);
+
+        return view('response.sukses_debt', compact('data'));
+    }
+
+    public function gagalDebt($id, $sumber)
+    {
+        $data = DebtPaymentProject::with('project.klien')->where('kode_transaksi', $id)->first();
+        return view('response.gagal_debt', compact('data'));
+    }
+
+    public function suksesDP($id, $sumber, $metode)
+    {
+        $data = ProgressProject::with('klien')->where('kode_transaksi', $id)->first();
+        Omset::create([
+            'progress_projects_id' => $data->id,
+            'tanggal' => date('Y-m-d'),
+            'sumber_lead' => $sumber,
+            'nominal' => $data->uang_muka,
+            'metode_pembayaran' => $metode,
+            'catatan_pembayaran' => 'DP PROJECT'
+        ]);
+        return view('response.sukses_dp', compact('data'));
+    }
+
+    public function gagalDP($id, $sumber)
+    {
+        $data = ProgressProject::with('klien')->where('kode_transaksi', $id)->first();
+        return view('response.gagal_dp', compact('data'));
     }
 }
