@@ -162,6 +162,16 @@ class MaintenanceController extends Controller
         return $pdf->download("Nota-$kode_transaksi.pdf");
     }
 
+    public function cetakInvoice($id)
+    {
+        $data = Maintenance::with('project.klien')->find($id);
+
+        $pdf = PDF::loadView('maintenances.invoice', compact('data'))
+            ->setPaper('A4', 'potrait');
+
+        return $pdf->download("Invoice-Maintenance-$id.pdf");
+    }
+
     public function downloadPdf()
     {
         $maintenances = Maintenance::with('project.klien')->get();

@@ -104,8 +104,14 @@
                     <td>{{ $item->status }}</td>
                     <td>{{ $item->status_pembayaran }}</td>
                     <td>Rp {{ number_format(optional($item->omsets)->sum('nominal') ?? 0, 0, ',', '.') }}</td>
-                    <td>Rp
-                        {{ number_format($item->nominal - (optional($item->omsets)->sum('nominal') ?? 0), 0, ',', '.') }}
+                    <td>
+                        Rp
+                        {{ number_format(
+                            $item->nominal - (optional($item->omsets)->where('catatan_pembayaran', '!=', 'MAINTENANCE')->sum('nominal') ?? 0),
+                            0,
+                            ',',
+                            '.',
+                        ) }}
                     </td>
                 </tr>
             @empty

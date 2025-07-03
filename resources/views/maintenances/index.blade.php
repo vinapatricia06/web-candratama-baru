@@ -133,6 +133,10 @@
                                                 onclick="pembayaran({{ $maintenance->id }})">
                                                 <i class="fas fa-money-bill-wave"></i> Pembayaran
                                             </button>
+                                            <a href="{{ route('maintenances.invoice', $maintenance->id) }}" target="_blank"
+                                                class="btn btn-info btn-sm">
+                                                <i class="fas fa-file-invoice"></i> Cetak Invoice
+                                            </a>
                                         @elseif($maintenance->status_pembayaran == 'Sudah Dibayar')
                                             <a href="{{ route('maintenances.nota', $maintenance->id) }}" target="_blank"
                                                 class="btn btn-dark btn-sm">

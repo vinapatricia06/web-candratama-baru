@@ -95,6 +95,7 @@ Route::middleware(['auth', 'role:admin,marketing,finance'])->group(function () {
     Route::post('maintenances/hapusBulan', [MaintenanceController::class, 'hapusBulan'])->name('maintenances.hapusBulan');
     Route::get('/get_data_project', [MaintenanceController::class, 'get_data_project'])->name('get_data_project');
     Route::get('/nota/maintenance/{id}', [MaintenanceController::class, 'cetakNota'])->name('maintenances.nota');
+    Route::get('/invoice/maintenance/{id}', [MaintenanceController::class, 'cetakInvoice'])->name('maintenances.invoice');
     Route::post('/create-transaction-maintenance', [MidtransController::class, 'createTransactionMaintenance'])->name('createTransactionMaintenance');
     Route::get('/suksesMaintenance/{id}/{sumber}/{metode}', [MidtransController::class, 'suksesMaintenance'])->name('suksesMaintenance');
     Route::get('/gagalMaintenance/{id}/{sumber}', [MidtransController::class, 'gagalMaintenance'])->name('gagalMaintenance');

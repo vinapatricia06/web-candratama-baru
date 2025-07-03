@@ -357,7 +357,7 @@ class ProgressProjectController extends Controller
         $pdf = PDF::loadView('progress_projects.invoice', compact('data'))
             ->setPaper('A4', 'potrait');
 
-        return $pdf->download("Invoice-$id.pdf");
+        return $pdf->download("Invoice-Project-$id.pdf");
     }
 
     public function cetakInvoiceDP($id)
@@ -367,7 +367,7 @@ class ProgressProjectController extends Controller
         $pdf = PDF::loadView('progress_projects.invoice_dp', compact('data'))
             ->setPaper('A4', 'potrait');
 
-        return $pdf->download("Invoice-$id.pdf");
+        return $pdf->download("Invoice-DP-$id.pdf");
     }
 
     public function cetakInvoiceDebt($id)
@@ -385,7 +385,7 @@ class ProgressProjectController extends Controller
         $pdf = PDF::loadView('progress_projects.invoice_debt', compact('data', 'installmentNumber'))
             ->setPaper('A4', 'potrait');
 
-        return $pdf->download("Invoice-$id.pdf");
+        return $pdf->download("Invoice-Angsuran-$id.pdf");
     }
 
     public function hapusBulan(Request $request)
