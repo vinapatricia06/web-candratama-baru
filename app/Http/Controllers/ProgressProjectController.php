@@ -312,7 +312,7 @@ class ProgressProjectController extends Controller
     {
         $status_project = $request->status_project;
         $status_pembayaran = $request->status_pembayaran;
-
+        $tipe = $request->tipe;
         $data = ProgressProject::with('klien', 'teknisi', 'omsets')
             ->when($status_project, function ($query, $status_project) {
                 return $query->where('status', $status_project);
@@ -327,10 +327,15 @@ class ProgressProjectController extends Controller
                 return $query->where('status_pembayaran', ['Lunas', 'Sudah Dibayar']);
             })
             ->get();
-        $pdf = PDF::loadView('progress_projects.pdf_report', compact('data'))
-            ->setPaper('A4', 'landscape');
 
-        return $pdf->download('report_projects.pdf');
+        if ($tipe == 'view') {
+            return view('progress_projects.report', compact('data', 'status_project', 'status_pembayaran'));
+        } else if ($tipe == 'download') {
+            $pdf = PDF::loadView('progress_projects.pdf_report', compact('data', 'status_project', 'status_pembayaran'))
+                ->setPaper('A4', 'landscape');
+
+            return $pdf->download('report_projects.pdf');
+        }
     }
 
     public function cetakNota($id)

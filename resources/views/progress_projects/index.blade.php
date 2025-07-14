@@ -519,40 +519,36 @@
         document.getElementById('downloadReport').addEventListener('click', function() {
             Swal.fire({
                 title: 'Filter Laporan Project',
-                html: `<div class="form-group text-left">
-                <label>Status Project</label>
-                <select id="status_project" class="form-control">
-                    <option value="0">-- Semua Status --</option>
-                    <option value="Inisialisasi">Inisialisasi</option>
-                    <option value="Diproses">Diproses</option>
-                    <option value="Dibatalkan">Dibatalkan</option>
-                    <option value="Selesai">Selesai</option>
-                </select>
-            </div>
-            <div class="form-group text-left mt-2">
-                <label>Status Pembayaran</label>
-                <select id="status_pembayaran" class="form-control">
-                    <option value="semua">-- Semua Status --</option>
-                    <option value="belum">Belum Dibayar</option>
-                    <option value="sebagian">Dibayar Sebagian</option>
-                    <option value="lunas">Lunas</option>
-                </select>
-            </div>`,
+                html: `
+            <label>Status Project</label>
+            <select id="status_project" class="form-control">
+                <option value="0">-- Semua Status --</option>
+                <option value="Inisialisasi">Inisialisasi</option>
+                <option value="Diproses">Diproses</option>
+                <option value="Dibatalkan">Dibatalkan</option>
+                <option value="Selesai">Selesai</option>
+            </select>
+            <label class="mt-2">Status Pembayaran</label>
+            <select id="status_pembayaran" class="form-control">
+                <option value="semua">-- Semua Status --</option>
+                <option value="belum">Belum Dibayar</option>
+                <option value="sebagian">Dibayar Sebagian</option>
+                <option value="lunas">Lunas</option>
+            </select>`,
                 showCancelButton: true,
                 confirmButtonText: 'Download',
-                cancelButtonText: 'Batal',
                 preConfirm: () => {
-                    const statusProject = document.getElementById('status_project').value;
-                    const statusPembayaran = document.getElementById('status_pembayaran').value;
-
-                    if (!statusProject || !statusPembayaran) {
-                        Swal.showValidationMessage('Semua field harus diisi!');
-                        return false;
-                    }
-
-                    const url =
-                        `{{ route('progress_projects.downloadReport') }}?status_project=${encodeURIComponent(statusProject)}&status_pembayaran=${encodeURIComponent(statusPembayaran)}`;
-                    window.location.href = url;
+                    const f = document.createElement('form');
+                    f.method = 'POST';
+                    f.action = `{{ route('progress_projects.downloadReport') }}`;
+                    f.innerHTML = `
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="status_project" value="${document.getElementById('status_project').value}">
+                <input type="hidden" name="status_pembayaran" value="${document.getElementById('status_pembayaran').value}">
+                <input type="hidden" name="tipe" value="view">
+            `;
+                    document.body.appendChild(f);
+                    f.submit();
                 }
             });
         });

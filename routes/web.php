@@ -84,7 +84,7 @@ Route::middleware(['auth', 'role:admin,marketing,finance'])->group(function () {
 });
 Route::get('/progress_projects', [ProgressProjectController::class, 'index'])->name('progress_projects.index');
 Route::get('/progress-projects/download', [ProgressProjectController::class, 'downloadPdf'])->name('progress_projects.downloadPdf');
-Route::get('/progress-projects/download-report', [ProgressProjectController::class, 'downloadReport'])->name('progress_projects.downloadReport');
+Route::post('/progress-projects/download-report', [ProgressProjectController::class, 'downloadReport'])->name('progress_projects.downloadReport');
 
 Route::middleware(['auth', 'role:admin,marketing,finance'])->group(function () {
     Route::get('/maintenances/create', [MaintenanceController::class, 'create'])->name('maintenances.create');

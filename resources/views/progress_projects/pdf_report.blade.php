@@ -69,11 +69,17 @@
 <body>
 
     <div class="header">
+        @php
+            $judulStatusProject = $status_project == 0 ? 'Semua Status Project' : $status_project;
+            $judulStatusPembayaran =
+                $status_pembayaran == 'semua' ? 'Semua Status Pembayaran' : $status_pembayaran . ' dibayar';
+        @endphp
         <img src="D:\web-candratama\public\images\kops.png" alt="Candratama Granites" width="600">
         <div class="line-top"></div>
         <div class="line-bottom"></div>
-
         <h1>Progress Project</h1>
+        <h3 style="margin-bottom: 0px;">Status Project: {{ $judulStatusProject }}</h3>
+        <h3 style="margin-bottom: 0px;">Status Pembayaran: {{ $judulStatusPembayaran }}</h3>
         <br>
     </div>
 
@@ -88,6 +94,7 @@
                 <th>Tanggal Selesai</th>
                 <th>Status Project</th>
                 <th>Status Pembayaran</th>
+                <th>Total Pembayaran</th>
                 <th>Uang Masuk</th>
                 <th>Sisa Pembayaran</th>
             </tr>
@@ -103,7 +110,10 @@
                     <td>{{ $item->tanggal_selesai }}</td>
                     <td>{{ $item->status }}</td>
                     <td>{{ $item->status_pembayaran }}</td>
-                    <td>Rp {{ number_format(optional($item->omsets)->sum('nominal') ?? 0, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($item->nominal ?? 0, 0, ',', '.') }}</td>
+                    <td>Rp
+                        {{ number_format(optional($item->omsets)->where('catatan_pembayaran', '!=', 'MAINTENANCE')->sum('nominal') ?? 0, 0, ',', '.') }}
+                    </td>
                     <td>
                         Rp
                         {{ number_format(

@@ -114,7 +114,8 @@
                 <select name="is_hutang" id="metode_pembayaran" class="form-control" required
                     @if (in_array($progress_project->status_pembayaran, ['Sudah Dibayar', 'Dibayar Sebagian', 'Lunas'])) disabled @endif>
                     <option value="">-- Pilih Metode --</option>
-                    <option value="0" {{ $progress_project->is_hutang == 0 ? 'selected' : '' }}>Pembayaran Langsung</option>
+                    <option value="0" {{ $progress_project->is_hutang == 0 ? 'selected' : '' }}>Pembayaran Langsung
+                    </option>
                     <option value="1" {{ $progress_project->is_hutang == 1 ? 'selected' : '' }}>Hutang</option>
                 </select>
             </div>
@@ -122,7 +123,7 @@
             <div id="form_angsuran" style="{{ $progress_project->is_hutang == 1 ? '' : 'display: none;' }}">
                 <div class="mb-3">
                     <label>Uang Muka</label>
-                    <input type="number" name="uang_muka" id="uang_muka" class="form-control" min="1"
+                    <input type="number" name="uang_muka" id="uang_muka" class="form-control"
                         placeholder="Masukkan uang muka" value="{{ old('nominal', $progress_project->uang_muka) }}"
                         @if (in_array($progress_project->status_pembayaran, ['Dibayar Sebagian', 'Lunas'])) disabled @endif>
                 </div>
