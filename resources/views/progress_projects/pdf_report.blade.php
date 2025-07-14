@@ -83,6 +83,11 @@
         <br>
     </div>
 
+    @php
+        $grand_total_pembayaran = 0;
+        $grand_total_uang_masuk = 0;
+    @endphp
+
     <table>
         <thead>
             <tr>
@@ -101,6 +106,15 @@
         </thead>
         <tbody>
             @forelse ($data as $key => $item)
+                @php
+                    $total_pembayaran = $item->nominal ?? 0;
+                    $uang_masuk =
+                        optional($item->omsets)->where('catatan_pembayaran', '!=', 'MAINTENANCE')->sum('nominal') ?? 0;
+                    $sisa_pembayaran = $total_pembayaran - $uang_masuk;
+
+                    $grand_total_pembayaran += $total_pembayaran;
+                    $grand_total_uang_masuk += $uang_masuk;
+                @endphp
                 <tr>
                     <td>{{ $key + 1 }}</td>
                     <td>{{ $item->project }}</td>
@@ -110,26 +124,27 @@
                     <td>{{ $item->tanggal_selesai }}</td>
                     <td>{{ $item->status }}</td>
                     <td>{{ $item->status_pembayaran }}</td>
-                    <td>Rp {{ number_format($item->nominal ?? 0, 0, ',', '.') }}</td>
-                    <td>Rp
-                        {{ number_format(optional($item->omsets)->where('catatan_pembayaran', '!=', 'MAINTENANCE')->sum('nominal') ?? 0, 0, ',', '.') }}
-                    </td>
-                    <td>
-                        Rp
-                        {{ number_format(
-                            $item->nominal - (optional($item->omsets)->where('catatan_pembayaran', '!=', 'MAINTENANCE')->sum('nominal') ?? 0),
-                            0,
-                            ',',
-                            '.',
-                        ) }}
-                    </td>
+                    <td>Rp {{ number_format($total_pembayaran, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($uang_masuk, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($sisa_pembayaran, 0, ',', '.') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10" style="text-align: center;">Tidak ada data yang ditemukan</td>
+                    <td colspan="11" style="text-align: center;">Tidak ada data yang ditemukan</td>
                 </tr>
             @endforelse
         </tbody>
+        @php
+            $grand_total_sisa = $grand_total_pembayaran - $grand_total_uang_masuk;
+        @endphp
+        <tfoot>
+            <tr style="font-weight: bold; background-color: #f8f9fa;">
+                <td colspan="8" style="text-align: right;">Grand Total</td>
+                <td>Rp {{ number_format($grand_total_pembayaran, 0, ',', '.') }}</td>
+                <td>Rp {{ number_format($grand_total_uang_masuk, 0, ',', '.') }}</td>
+                <td>Rp {{ number_format($grand_total_sisa, 0, ',', '.') }}</td>
+            </tr>
+        </tfoot>
     </table>
 
 </body>

@@ -27,6 +27,11 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive" style="max-width: 100%; overflow-x: auto;">
+                    @php
+                        $grand_total_pembayaran = 0;
+                        $grand_total_uang_masuk = 0;
+                    @endphp
+
                     <table class="table table-bordered" style="font-size: 18px; width: 100%; table-layout: auto;">
                         <thead class="table-light">
                             <tr>
@@ -45,6 +50,18 @@
                         </thead>
                         <tbody>
                             @forelse ($data as $key => $item)
+                                @php
+                                    $total_pembayaran = $item->nominal ?? 0;
+                                    $uang_masuk =
+                                        optional($item->omsets)
+                                            ->where('catatan_pembayaran', '!=', 'MAINTENANCE')
+                                            ->sum('nominal') ?? 0;
+                                    $sisa_pembayaran = $total_pembayaran - $uang_masuk;
+
+                                    // Akumulasi grand total
+                                    $grand_total_pembayaran += $total_pembayaran;
+                                    $grand_total_uang_masuk += $uang_masuk;
+                                @endphp
                                 <tr>
                                     <td>{{ $key + 1 }}</td>
                                     <td>{{ $item->project }}</td>
@@ -54,26 +71,27 @@
                                     <td>{{ $item->tanggal_selesai }}</td>
                                     <td>{{ $item->status }}</td>
                                     <td>{{ $item->status_pembayaran }}</td>
-                                    <td>Rp {{ number_format($item->nominal ?? 0, 0, ',', '.') }}</td>
-                                    <td>Rp
-                                        {{ number_format(optional($item->omsets)->where('catatan_pembayaran', '!=', 'MAINTENANCE')->sum('nominal') ?? 0, 0, ',', '.') }}
-                                    </td>
-                                    <td>
-                                        Rp
-                                        {{ number_format(
-                                            $item->nominal - (optional($item->omsets)->where('catatan_pembayaran', '!=', 'MAINTENANCE')->sum('nominal') ?? 0),
-                                            0,
-                                            ',',
-                                            '.',
-                                        ) }}
-                                    </td>
+                                    <td>Rp {{ number_format($total_pembayaran, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($uang_masuk, 0, ',', '.') }}</td>
+                                    <td>Rp {{ number_format($sisa_pembayaran, 0, ',', '.') }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="10" style="text-align: center;">Tidak ada data yang ditemukan</td>
+                                    <td colspan="11" style="text-align: center;">Tidak ada data yang ditemukan</td>
                                 </tr>
                             @endforelse
                         </tbody>
+                        <tfoot class="table-light">
+                            @php
+                                $grand_total_sisa = $grand_total_pembayaran - $grand_total_uang_masuk;
+                            @endphp
+                            <tr>
+                                <th colspan="8" style="text-align: right;">Grand Total</th>
+                                <th>Rp {{ number_format($grand_total_pembayaran, 0, ',', '.') }}</th>
+                                <th>Rp {{ number_format($grand_total_uang_masuk, 0, ',', '.') }}</th>
+                                <th>Rp {{ number_format($grand_total_sisa, 0, ',', '.') }}</th>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
